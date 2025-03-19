@@ -22,7 +22,7 @@ toc: false
     title="Data Products: Travis' Fast Recipe for Success"
     subtitle="Learn how to create effective data products that drive business value and user adoption."
     link="/blog/2025-03-18-data-product-whitepaper"
-    image="/images/blog/Data_Products_Whitepaper.png" 
+    image="/images/blog/Data_Products_Whitepaper_low_res.png" 
   >}}
   
   {{< card 

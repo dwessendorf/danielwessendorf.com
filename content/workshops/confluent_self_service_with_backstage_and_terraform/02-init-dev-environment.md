@@ -1,18 +1,20 @@
 ---
-title: 02 - Initialize Development Envionment
+title: 2 - Initialize Development Envionment
 type: docs
-prev: workshops/01-introduction
+prev: workshops/03-configuring-github-authentication
 ---
 ## Prerequisites
 
 - Node.js 16 or later
-- Yarn
+- Yarn (Version 4.4.1)
 - Docker (for TechDocs)
 - Git
 - A GitHub account
 - A Confluent Cloud account with API keys
 
-## Step 1: Setting Up a New Backstage Project
+For detailed reqirements of needed versions see [Backstage Getting Started Guide](https://backstage.io/docs/getting-started/)
+
+## Setting Up a New Backstage Project
 
 Let's start by creating a new Backstage project:
 

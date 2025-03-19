@@ -1,5 +1,5 @@
 ---
-title: 03 - configuring github authentication
+title: 3 - Configuring Github Authentication
 type: docs
 prev: workshops/01-introduction
 ---
@@ -7,7 +7,7 @@ Configuring GitHub Authentication
 
 Next, let's set up GitHub authentication to provide a secure, identity-based access system.
 
-### 2.1 Create a GitHub OAuth App
+### Create a GitHub OAuth App
 
 1. Go to your GitHub account settings
 2. Navigate to "Developer settings" → "OAuth Apps" → "New OAuth App"
@@ -17,7 +17,7 @@ Next, let's set up GitHub authentication to provide a secure, identity-based acc
    - Authorization callback URL: "http://localhost:7007/api/auth/github/handler/frame"
 4. Register the application and note the Client ID and Client Secret
 
-### 2.2 Configure Backstage for GitHub Auth
+### Configure Backstage for GitHub Auth
 
 Update your `app-config.yaml` file to include the GitHub authentication provider:
 
@@ -41,7 +41,7 @@ AUTH_GITHUB_CLIENT_ID=your_client_id
 AUTH_GITHUB_CLIENT_SECRET=your_client_secret
 ```
 
-### 2.3 Update Your App Configuration
+### Update Your App Configuration
 
 Modify your `packages/app/src/App.tsx` file to add the sign-in page component:
 

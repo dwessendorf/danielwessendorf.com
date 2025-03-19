@@ -1,6 +1,5 @@
 ---
 title: Workshops
-next: first-page
 toc: true
 ---
 
