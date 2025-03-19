@@ -1,0 +1,24 @@
+{{- $lightSrc := .Get "light" -}}
+{{- $darkSrc := .Get "dark" | default $lightSrc -}}
+{{- $alt := .Get "alt" | default "" -}}
+{{- $class := .Get "class" | default "" -}}
+{{- $style := .Get "style" | default "" -}}
+{{- $width := .Get "width" | default "" -}}
+{{- $height := .Get "height" | default "" -}}
+
+<span class="theme-image {{ $class }}" style="{{ $style }}">
+  <img 
+    src="{{ $lightSrc }}" 
+    alt="{{ $alt }}" 
+    class="light-mode-image" 
+    {{ with $width }}width="{{ . }}"{{ end }} 
+    {{ with $height }}height="{{ . }}"{{ end }}
+  />
+  <img 
+    src="{{ $darkSrc }}" 
+    alt="{{ $alt }}" 
+    class="dark-mode-image" 
+    {{ with $width }}width="{{ . }}"{{ end }} 
+    {{ with $height }}height="{{ . }}"{{ end }}
+  />
+</span> 

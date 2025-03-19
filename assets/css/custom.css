@@ -1,0 +1,56 @@
+/* Import Ubuntu font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap');
+
+/* Apply Ubuntu font to the entire website */
+:root {
+  --font-family-base: 'Ubuntu', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  --font-family-heading: 'Ubuntu', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  --font-family-mono: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+body {
+  font-family: var(--font-family-base);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-heading);
+}
+
+/* Simple light/dark mode approach */
+.image-container {
+  position: relative;
+  display: inline-block;
+  background-color: transparent !important;
+}
+
+/* Default state - light mode */
+.light-image {
+  display: block !important;
+  z-index: 1;
+}
+
+.dark-image {
+  display: none !important;
+  z-index: 2;
+}
+
+/* Dark mode */
+html.dark .light-image {
+  display: none !important;
+}
+
+html.dark .dark-image {
+  display: block !important;
+}
+
+/* Invert SVG icons in dark mode */
+html.dark .invert-in-dark {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* Fix transparency issues */
+.transparent-bg, 
+.transparent-image {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
