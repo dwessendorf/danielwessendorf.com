@@ -18,9 +18,9 @@ Please find below my very first workshop of this kind. Pass on by from time to t
 
 {{< cards >}}
   {{< card 
-    title="Data Products: Travis' Fast Recipe for Success"
-    subtitle="Learn how to create effective data products that drive business value and user adoption."
-    link="/blog/2025-03-18-data-product-whitepaper"
-    image="/images/blog/Data_Products_Whitepaper.png" 
+    title="Creating a Confluent Self-Service Developer Platform with Backstage and Terraform"
+    subtitle="In this blog post you will learn how to create a Self Service Portal for Confluent Clusters using Backstage and Terraform"
+    link="/workshops/confluent_self_service_with_backstage_and_terraform"
+    image="/images/blog/backstage.jpg" 
   >}}
 {{< /cards >}}
