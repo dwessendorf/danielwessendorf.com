@@ -1,7 +1,7 @@
 ---
 title: 1 - Introduction
 type: docs
-next: workshops/02-init-dev-environment
+next: 02-init-dev-environment
 ---
 
 ## Introduction

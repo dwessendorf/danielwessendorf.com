@@ -1,8 +1,10 @@
 ---
 title: 3 - Configuring Github Authentication
 type: docs
-prev: workshops/01-introduction
+prev: 02-init-dev-environment
+next: 04-configure-org-and-catalog-entries
 ---
+
 Configuring GitHub Authentication
 
 Next, let's set up GitHub authentication to provide a secure, identity-based access system.

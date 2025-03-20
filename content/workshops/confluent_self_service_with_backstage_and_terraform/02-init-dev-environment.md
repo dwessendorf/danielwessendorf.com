@@ -1,7 +1,8 @@
 ---
 title: 2 - Initialize Development Envionment
 type: docs
-prev: workshops/03-configuring-github-authentication
+prev: 01-introduction
+next: 03-configuring-github-authentication
 ---
 ## Prerequisites
 
