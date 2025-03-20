@@ -26,7 +26,7 @@ toc: false
   >}}
   
   {{< card 
-    title="Baking a Confluent Self-Service Developer Platform with Backstage and Terraform"
+    title="Building a Confluent Self-Service Developer Platform with Backstage and Terraform"
     subtitle="In this blog post you will learn how to create a Self Service Portal for Confluent Clusters using Backstage and Terraform"
     link="/blog/2025-03-16-confluent-self-service-with-backstage-part-1"
     image="/images/blog/backstage.jpg" 
