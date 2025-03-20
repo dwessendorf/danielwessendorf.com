@@ -1,4 +1,4 @@
-module github.com/imfing/hextra-starter-template
+module github.com/dwessendorf/danielwessendorf.com
 
 go 1.21
 
