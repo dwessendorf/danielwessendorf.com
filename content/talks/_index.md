@@ -17,3 +17,5 @@ Talk: "Building the Data Streaming Organization"
 Talk: "The Data Streaming Organization"
 ![](DiMT-Frankfurt-1.jpg)
 [Slides...](Daniel_Wessendorf_Data_in_Motion_Tour_2024_Frankfurt_The_Data_Streaming_Organization.pdf)
+
+
