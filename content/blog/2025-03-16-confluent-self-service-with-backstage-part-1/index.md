@@ -41,7 +41,7 @@ flowchart TD
 2. Setting up a GitHub Personal Access Token
 3. Configuring GitHub authentication and GitHub Actions
 4. Setting up the organizational structure
-5. Creating a software catalog
+5. Creating first static software catalog entry for Confluent Cloud
 6. Building a custom plugin for Confluent Cloud integration
 7. Creating templates for Confluent Cloud provisioning
 8. Creating a Cluster Template
@@ -115,7 +115,7 @@ integrations:
       token: ${GITHUB_TOKEN}
 ```
 
-Start the app in development mode to make sure everything is working:
+Start the app in development mode to make sure the initial setup of backstage is working properly:
 
 ```bash
 yarn dev
@@ -133,7 +133,7 @@ Sign in as guest for now. You should see the default Backstage welcome page.
 
 ## Step 3: Configuring GitHub Authentication
 
-Next, let's set up GitHub authentication to provide a secure, identity-based access system.
+Next, let's set up GitHub authentication to provide a secure, identity-based access system and leverage the great integration of Backstage with GitHub like the GitHub Actions plugin.
 
 ### 3.1 Create a GitHub OAuth App
 
@@ -149,10 +149,11 @@ Next, let's set up GitHub authentication to provide a secure, identity-based acc
 
 ### 3.2 Configure Backstage for GitHub Auth
 
-Update your `app-config.yaml` file to include the GitHub authentication provider.
+Update your `app-config.yaml` file to include the GitHub authentication provider and GitHub Actions configuration.
 Replace the existing auth section with the following:
 
 ```yaml {filename="app-config.yaml"}
+# GitHub authentication configuration
 auth:
   environment: development
   providers:
@@ -163,6 +164,17 @@ auth:
         signIn:
           resolvers:
             - resolver: usernameMatchingUserEntityName
+
+# GitHub integration for repository operations and GitHub Actions
+integrations:
+  github:
+    - host: github.com
+      token: ${GITHUB_TOKEN}
+
+# GitHub Actions configuration
+github:
+  actions:
+    allowedDomains: ['github.com']
 ```
 
 Create or modify the `.env` file in the root of your project to store the GitHub OAuth credentials:
@@ -183,16 +195,14 @@ export AUTH_GITHUB_CLIENT_SECRET=your_client_secret
 
 Modify your `packages/app/src/App.tsx` file to add the sign-in page component and GitHub Actions plugin:
 
-```typescript {filename="packages/app/src/App.tsx", hl_lines=[4, 7, 8, 9, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 50, 51, 52, 53, 54, 55] }
+```typescript {filename="packages/app/src/App.tsx", hl_lines=[4, 6, 7, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,  48, 49, 50, 51, 52] }
 // Other imports...
 import { catalogEntityCreatePermission } from '@backstage/plugin-catalog-common/alpha';
 
 import { githubAuthApiRef } from '@backstage/core-plugin-api';
-import { SignInPage } from '@backstage/core-components';
 // Import the GitHub Actions plugin components
-import { EntityGithubActionsContent } from '@backstage/plugin-github-actions';
+import { EntityGithubActionsContent } from '@backstage-community/plugin-github-actions';
 import { EntityLayout } from '@backstage/plugin-catalog';
-import { Route } from 'react-router-dom';
 
 const app = createApp({
   apis,
@@ -233,7 +243,6 @@ const routes = (
   <FlatRoutes>
     {/* ... other routes ... */}
     <Route path="/catalog/:namespace/:kind/:name" element={<CatalogEntityPage />}>
-      {/* Add the GitHub Actions tab */}
       <EntityLayout.Route path="/actions" title="Actions">
         <EntityGithubActionsContent />
       </EntityLayout.Route>
@@ -243,13 +252,13 @@ const routes = (
 );
 ```
 
-Install the required packages:
+Install the required packages for the frontend:
 
 ```bash
-yarn --cwd packages/app add @backstage/core-components @backstage/plugin-github-actions
+yarn --cwd packages/app add @backstage/core-components @backstage-community/plugin-github-actions
 ```
 
-Update your backend code in `packages/backend/src/index.ts` to include the auth plugin. Comment out the guest provider as we don't want to use it and replace it with the below lineGitHub provider.
+Update your backend code in `packages/backend/src/index.ts` to include the auth plugin:
 
 ```typescript {filename="packages/backend/src/index.ts", hl_lines=[5]}
 // auth plugin
@@ -260,58 +269,11 @@ backend.add(import('@backstage/plugin-auth-backend-module-github-provider'));
 // See https://backstage.io/docs/auth/guest/provider
 ```
 
-Install the backend auth plugins:
+Install the backend plugins:
 
 ```bash
+# Install auth plugins
 yarn --cwd packages/backend add @backstage/plugin-auth-backend @backstage/plugin-auth-backend-module-github-provider
-```
-
-### 3.4 Adding GitHub Actions Plugin
-
-To enable visibility of GitHub Actions workflows directly within Backstage, let's add the GitHub Actions plugin.
-
-#### 3.4.1 Install Plugin Dependencies
-
-Install the necessary packages for the backend:
-
-```bash
-# Install the GitHub Actions plugin for the backend
-yarn --cwd packages/backend add @backstage/plugin-github-actions-backend
-```
-
-Note: We've already installed the frontend package (@backstage/plugin-github-actions) and added the necessary UI components in section 3.3.
-
-#### 3.4.2 Update Frontend Configuration
-
-We've already updated the App.tsx file in section 3.3 to include the GitHub Actions plugin components and routes.
-
-#### 3.4.3 Update Backend Configuration
-
-Update your backend by modifying the `packages/backend/src/index.ts` file:
-
-```typescript {filename="packages/backend/src/index.ts", hl_lines=[8]}
-// Other backend plugins...
-backend.add(import('@backstage/plugin-auth-backend'));
-backend.add(import('@backstage/plugin-auth-backend-module-github-provider'));
-// ... other plugins ...
-
-// Add GitHub Actions backend plugin
-backend.add(import('@backstage/plugin-github-actions-backend'));
-```
-
-#### 3.4.4 Update Application Configuration
-
-Update your `app-config.yaml` file to ensure the GitHub Actions plugin has access to the GitHub token:
-
-```yaml {filename="app-config.yaml"}
-integrations:
-  github:
-    - host: github.com
-      token: ${GITHUB_TOKEN}
-
-github:
-  actions:
-    allowedDomains: ['github.com']
 ```
 
 Now, when you navigate to the entity page for a repository managed by Backstage, you'll see an "Actions" tab that shows the GitHub Actions workflows for that repository.
@@ -425,19 +387,27 @@ catalog:
 
 ## Step 6: Building a Custom Plugin for Confluent Cloud Integration
 
-By default backstage scaffolder actions cannot access environment variables for security reasons. As we don't want to expose the API keys in the repository, we need to create a custom action that will retrieve the credentials from environment variables.
-Alternatively, we could use a secret manager to store the credentials and retrieve them from there within a similar custom action.
+### 6.1 Understanding the Need for a Custom Action
 
-### 6.1 Create the Custom Action
+Backstage's scaffolder is designed with security in mind, and for good reason. By default, scaffolder actions cannot access environment variables from the host system - this is a deliberate security measure to prevent templates from accessing sensitive credentials.
 
-Create a new directory for our custom scaffolder actions and a new file `packages/backend/src/plugins/scaffolder/actions/getConfluentCredentials.ts` for the action:
+However, for our Confluent Cloud integration, we need a way to securely provide API credentials to our templates without hardcoding them. We have two options:
+
+1. **Create a custom action** (the approach we'll use) - This action will safely retrieve the Confluent Cloud credentials from environment variables on the Backstage server and pass them to the templates.
+
+2. **Use a secret manager** - Alternatively, we could integrate with a secret manager like HashiCorp Vault or AWS Secrets Manager.
+
+For this tutorial, we'll create a simple custom action that retrieves the credentials from environment variables and makes them available to our templates in a controlled way.
+
+### 6.2 Create the Custom Action
+
+Let's create a new directory for our custom scaffolder action and a new file `packages/backend/src/plugins/scaffolder/actions/getConfluentCredentials.ts` for the action:
 
 ```bash
 mkdir -p packages/backend/src/plugins/scaffolder/actions
 touch packages/backend/src/plugins/scaffolder/actions/getConfluentCredentials.ts
 ```
 
-Add following content to the `getConfluentCredentials.ts` file:
 
 ```typescript {filename="packages/backend/src/plugins/scaffolder/actions/getConfluentCredentials.ts"}
 import { createTemplateAction } from '@backstage/plugin-scaffolder-backend';
@@ -490,6 +460,12 @@ export const createGetConfluentCredentialsAction = () => {
 };
 ```
 
+This action:
+1. Creates a custom scaffolder action with ID `confluent:credentials:get`
+2. Defines the expected outputs (apiKey and apiSecret)
+3. Reads the credentials from environment variables
+4. Makes them available as outputs that can be used in subsequent template steps
+
 Create an `index.ts` file in the same directory to export the action:
 
 ```bash
@@ -500,9 +476,9 @@ touch packages/backend/src/plugins/scaffolder/actions/index.ts
 export { createGetConfluentCredentialsAction } from './getConfluentCredentials';
 ```
 
-### 6.2 Register the Custom Action
+### 6.3 Register the Custom Action
 
-Modify the `packages/backend/src/plugins/scaffolder.ts` file to include our custom action:
+Now, let's register our custom action with the scaffolder plugin. Create a new file `packages/backend/src/plugins/scaffolder.ts` and modify it:
 
 ```bash
 touch packages/backend/src/plugins/scaffolder.ts
@@ -526,6 +502,7 @@ export default async function createPlugin(
 
   const integrations = ScmIntegrations.fromConfig(env.config);
 
+  // Get all the default actions
   const builtInActions = createBuiltinActions({
     catalogClient,
     integrations,
@@ -533,6 +510,7 @@ export default async function createPlugin(
     reader: env.reader,
   });
 
+  // Add our custom action to the list
   const actions = [
     ...builtInActions,
     createGetConfluentCredentialsAction(),
@@ -570,7 +548,7 @@ export type PluginEnvironment = {
 }; 
 ```
 
-### 6.3 Add Confluent Cloud Configuration
+### 6.3 Add Confluent Cloud Credentials
 
 To interact with Confluent Cloud, you'll need to generate API keys through the Confluent Cloud console. Here's how:
 
@@ -603,15 +581,12 @@ Now, let's create templates for provisioning Confluent Cloud resources. We'll st
 
 ### 7.1 Create the Environment Template
 
-Create a directory for the environment template:
+Create a directory for the environment template and a template definition file in `confluent-self-service-templates/environment-template/template.yaml`:
 
 ```bash
-mkdir -p confluent-self-service-templates/environment-template/content
-mkdir -p confluent-self-service-templates/environment-template/content/.github/workflows
-mkdir -p confluent-self-service-templates/environment-template/content/docs
+mkdir -p confluent-self-service-templates/environment-template/
+touch confluent-self-service-templates/environment-template/template.yaml
 ```
-
-Create a template definition in `confluent-self-service-templates/environment-template/template.yaml`:
 
 ```yaml {filename="confluent-self-service-templates/environment-template/template.yaml"}
 apiVersion: scaffolder.backstage.io/v1beta3
@@ -687,7 +662,12 @@ Replace `YOUR_GITHUB_USERNAME` with your actual GitHub username.
 
 ### 7.2 Create the Environment Template Content
 
-Create a Terraform configuration in `confluent-self-service-templates/environment-template/content/main.tf`:
+Create a directory for the environment template content and a Terraform configuration file in `confluent-self-service-templates/environment-template/content/main.tf`:
+
+```bash
+mkdir -p confluent-self-service-templates/environment-template/content
+touch confluent-self-service-templates/environment-template/content/main.tf
+```
 
 ```hcl
 terraform {
@@ -727,6 +707,10 @@ output "environment_name" {
 
 Create a catalog info file in `confluent-self-service-templates/environment-template/content/catalog-info.yaml`:
 
+```bash
+touch confluent-self-service-templates/environment-template/content/catalog-info.yaml
+```
+
 ```yaml {filename="confluent-self-service-templates/environment-template/content/catalog-info.yaml"}
 apiVersion: backstage.io/v1alpha1
 kind: Component
@@ -750,7 +734,12 @@ Replace `YOUR_GITHUB_USERNAME` with your actual GitHub username.
 
 ### 7.3 Create GitHub Actions Workflow
 
-Create a GitHub Actions workflow in `confluent-self-service-templates/environment-template/content/.github/workflows/terraform-deploy.yml`:
+Create a folder for the GitHub Actions workflow and a workflow configurationfile `confluent-self-service-templates/environment-template/content/.github/workflows/terraform-deploy.yml`:
+
+```bash
+mkdir -p confluent-self-service-templates/environment-template/content/.github/workflows
+touch confluent-self-service-templates/environment-template/content/.github/workflows/terraform-deploy.yml
+```
 
 ```yaml {filename="confluent-self-service-templates/environment-template/content/.github/workflows/terraform-deploy.yml"}
 name: "Terraform Deploy"
@@ -821,9 +810,14 @@ jobs:
 
 ### 7.4 Create Documentation Setup
 
-Create a `mkdocs.yml` file in `confluent-self-service-templates/environment-template/content/`:
+Create a folder for the documentation and a `mkdocs.yml` file in `confluent-self-service-templates/environment-template/content/docs`:
 
-```yaml {filename="confluent-self-service-templates/environment-template/content/mkdocs.yml"}
+```bash
+mkdir -p confluent-self-service-templates/environment-template/content/docs
+touch confluent-self-service-templates/environment-template/content/docs/mkdocs.yml
+```
+
+```yaml {filename="confluent-self-service-templates/environment-template/content/docs/mkdocs.yml"}
 site_name: 'Confluent Cloud Environment'
 site_description: 'Documentation for Confluent Cloud Environment'
 
@@ -842,7 +836,11 @@ markdown_extensions:
 
 Create an initial documentation file in `confluent-self-service-templates/environment-template/content/docs/index.md`:
 
-```markdown
+```bash
+touch confluent-self-service-templates/environment-template/content/docs/index.md
+```
+
+```markdown {filename="confluent-self-service-templates/environment-template/content/docs/index.md"}
 # Confluent Cloud Environment
 
 This is the documentation for your Confluent Cloud environment.
@@ -1280,5 +1278,3 @@ Future enhancements could include:
 - Integrating with monitoring systems for observability
 
 Happy coding!
-
-
