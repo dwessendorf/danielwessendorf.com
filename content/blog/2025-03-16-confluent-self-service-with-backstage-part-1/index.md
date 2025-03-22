@@ -1134,8 +1134,6 @@ Replace `YOUR_GITHUB_USERNAME` with your actual GitHub username.
 The `dependsOn` annotation is used to build the backstage internal dependency graph.
 {{< /callout >}}
 
-
-
 ### 8.3 Create GitHub Actions Workflow for Clusters
 
 Create a GitHub Actions workflow in `confluent-self-service-templates/cluster-template/content/.github/workflows/terraform-deploy.yml`, similar to the environment workflow but with adjusted documentation output:
