@@ -515,9 +515,10 @@ export CONFLUENT_CLOUD_API_KEY=your_confluent_api_key
 export CONFLUENT_CLOUD_API_SECRET=your_confluent_api_secret
 ```
 
-## Step 7: Creating Templates for Confluent Cloud Provisioning
+## Step 7: Creating Templates for provisioning Confluent Cloud Environments
 
-Now, let's create templates for provisioning Confluent Cloud resources. We'll start with an environment template.
+Now, let's create templates for provisioning Confluent Cloud resources. We'll start with an environment template. We also use our custom action 
+in the template to get the Confluent Cloud credentials from the environment variables.
 
 ### 7.1 Create the Environment Template
 
@@ -527,8 +528,6 @@ Create a directory for the environment template `confluent-self-service-template
 mkdir -p confluent-self-service-templates/environment-template/
 touch confluent-self-service-templates/environment-template/template.yaml
 ```
-
-
 Add following content to the `template.yaml` file:
 
 ```yaml {filename="confluent-self-service-templates/environment-template/template.yaml"}
@@ -610,7 +609,12 @@ Replace `YOUR_GITHUB_USERNAME` with your actual GitHub username.
 
 ### 7.2 Create the Environment Template Content
 
-Create a directory for the environment template content  `confluent-self-service-templates/environment-template/content/` and within that directory create a Terraform configuration file called `main.tf`:
+The above tempalte will create a new Github repository and the necessary Infrastructure as Code (IaC)-files to provision a Confluent Cloud environment.
+The github repository also will contain an github actions workflow to provision the environment and a documentation page that will be created in the github actions workflow.
+These files are provided as content templates that will be used to create the actual files in the github repository.
+
+Create a directory for the environment template content  `confluent-self-service-templates/environment-template/content/`.
+Within that directory create a Terraform configuration file called `main.tf`:
 
 ```bash 
 mkdir -p confluent-self-service-templates/environment-template/content
@@ -664,6 +668,11 @@ Create a catalog info file in `confluent-self-service-templates/environment-temp
 touch confluent-self-service-templates/environment-template/content/catalog-info.yaml
 ```
 
+The catalog info file is used to register the environment in the Backstage catalog. It contains the necessary annotations
+and metadata to define the entity in the catalog.
+
+Add following content to the `catalog-info.yaml` file:
+
 ```yaml {filename="confluent-self-service-templates/environment-template/content/catalog-info.yaml"}
 apiVersion: backstage.io/v1alpha1
 kind: Component
@@ -685,9 +694,17 @@ spec:
 
 Replace `YOUR_GITHUB_USERNAME` with your actual GitHub username.
 
+{{< callout type="info" >}}
+The `github.com/project-slug` annotation is used to link the environment to the GitHub repository. This also enables backstage
+to show the result of the github actions workflow in the CICD-tab of the environment entity.
+The `backstage.io/techdocs-ref` annotation is used to specify the directory containing the documentation for the environment.
+{{< /callout >}}
+
+
 ### 7.3 Create GitHub Actions Workflow
 
-Create a folder for the GitHub Actions workflow and a workflow configurationfile `confluent-self-service-templates/environment-template/content/.github/workflows/terraform-deploy.yml`:
+Create a folder for the GitHub Actions workflow `confluent-self-service-templates/environment-template/content/.github/workflows/`.
+Add a workflow configurationfile `terraform-deploy.yml` to that folder:
 
 ```bash
 mkdir -p confluent-self-service-templates/environment-template/content/.github/workflows
@@ -779,6 +796,12 @@ as we want to use the secrets from the repository in the github actions workflow
 
 
 ### 7.4 Create Documentation Setup
+
+When the user initiates the template, some information like th environment id is not yet present and cannot be registered in the catalog.
+To get full transparency, we need to create a documentation page that will be dynamically created in the github actions workflow and stored
+in the repository once the environment is created.
+
+We will use the backstage techdocs feature to create this documentation page. 
 
 Create a folder for the documentation under `confluent-self-service-templates/environment-template/content/docs` and a `mkdocs.yml` file in that folder:
 
@@ -964,11 +987,23 @@ spec:
 
 Replace `YOUR_GITHUB_USERNAME` with your actual GitHub username.
 
+{{< callout type="info" >}}
+The `EntityPicker` field is a backstage standard component that allows to select an entity from the catalog.
+It allows the user to select an existing environment from the Backstage catalog.
+{{< /callout >}}
+
 
 
 ### 8.2 Create the Cluster Template Content
 
-Create a Terraform configuration in `confluent-self-service-templates/cluster-template/content/main.tf`:
+Create a content directory for the cluster template in `confluent-self-service-templates/cluster-template/content/` and a Terraform configuration file `main.tf`:
+
+```bash
+mkdir -p confluent-self-service-templates/cluster-template/content/
+touch confluent-self-service-templates/cluster-template/content/main.tf
+```
+
+Add following content to the `main.tf` file:
 
 ```hcl {filename="confluent-self-service-templates/cluster-template/content/main.tf"}
 terraform {
@@ -1058,7 +1093,19 @@ output "environment_name" {
 }
 ```
 
+{{< callout type="info" >}}
+Terraform enables us to lookup an environment by name. This is a great way to ensure that the cluster is 
+created in the correct environment and mitigates the fact that we only have the name as attribute in the 
+backstage catalog. It is also a good for handling drift, if the environment id of the environment changes.
+{{< /callout >}}
+
 Create a catalog info file in `confluent-self-service-templates/cluster-template/content/catalog-info.yaml`:
+
+```bash
+touch confluent-self-service-templates/cluster-template/content/catalog-info.yaml
+```
+
+Add following content to the `catalog-info.yaml` file:
 
 ```yaml {filename="confluent-self-service-templates/cluster-template/content/catalog-info.yaml"}
 apiVersion: backstage.io/v1alpha1
@@ -1082,6 +1129,12 @@ spec:
 ```
 
 Replace `YOUR_GITHUB_USERNAME` with your actual GitHub username.
+
+{{< callout type="info" >}}
+The `dependsOn` annotation is used to build the backstage internal dependency graph.
+{{< /callout >}}
+
+
 
 ### 8.3 Create GitHub Actions Workflow for Clusters
 
