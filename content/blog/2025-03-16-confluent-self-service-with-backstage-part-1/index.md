@@ -207,6 +207,7 @@ import { EntityLayout } from '@backstage/plugin-catalog';
 const app = createApp({
   apis,
   bindRoutes({ bind }) {
+    // Bind routes for Backstage plugins
     bind(catalogPlugin.externalRoutes, {
       createComponent: scaffolderPlugin.routes.root,
       viewTechDoc: techdocsPlugin.routes.docRoot,
@@ -224,6 +225,7 @@ const app = createApp({
     });
   },
   components: {
+    // Configure GitHub authentication sign-in page
     SignInPage: props => (
       <SignInPage
         {...props}
@@ -243,6 +245,7 @@ const routes = (
   <FlatRoutes>
     {/* ... other routes ... */}
     <Route path="/catalog/:namespace/:kind/:name" element={<CatalogEntityPage />}>
+      {/* Add the GitHub Actions tab to entity pages */}
       <EntityLayout.Route path="/actions" title="Actions">
         <EntityGithubActionsContent />
       </EntityLayout.Route>
@@ -385,7 +388,7 @@ catalog:
       target: ../../confluent-self-service-templates/entities.yaml
 ```
 
-## Step 6: Building a Custom Plugin for Confluent Cloud Integration
+## Step 6: Building a Custom Plugin for secret handling
 
 ### 6.1 Understanding the Need for a Custom Action
 
@@ -393,24 +396,49 @@ Backstage's scaffolder is designed with security in mind, and for good reason. B
 
 However, for our Confluent Cloud integration, we need a way to securely provide API credentials to our templates without hardcoding them. We have two options:
 
-1. **Create a custom action** (the approach we'll use) - This action will safely retrieve the Confluent Cloud credentials from environment variables on the Backstage server and pass them to the templates.
+1. **Retrieve the credentials from environment variables** (the approach we'll use) - We create a custom action that will safely retrieve the Confluent Cloud credentials from environment variables on the Backstage server and pass them to the templates.
 
-2. **Use a secret manager** - Alternatively, we could integrate with a secret manager like HashiCorp Vault or AWS Secrets Manager.
+2. **Use a secret manager** - Alternatively, we could create a similar custom action that integrates with a secret manager like HashiCorp Vault or AWS Secrets Manager. (More suitable for production environments)
 
-For this tutorial, we'll create a simple custom action that retrieves the credentials from environment variables and makes them available to our templates in a controlled way.
+For this tutorial, we'll implement the first option.
 
 ### 6.2 Create the Custom Action
 
-Let's create a new directory for our custom scaffolder action and a new file `packages/backend/src/plugins/scaffolder/actions/getConfluentCredentials.ts` for the action:
+The Backstage Scaffolder plugin comes with a set of default actions that can be used to create and manage templates. If you want to extend the default actions, you can create a new action by following these steps:
 
 ```bash
-mkdir -p packages/backend/src/plugins/scaffolder/actions
-touch packages/backend/src/plugins/scaffolder/actions/getConfluentCredentials.ts
+# Create a new scaffolder backend module
+yarn backstage-cli new
+# When prompted, choose scaffolder-backend-module 
+# Write getconfluentcredentials as the module id
 ```
 
+## Cleaning Up Example Files
 
-```typescript {filename="packages/backend/src/plugins/scaffolder/actions/getConfluentCredentials.ts"}
-import { createTemplateAction } from '@backstage/plugin-scaffolder-backend';
+The backstage cli creates a new scaffolder backend module with example files that explain how to create a new action. We can remove them:
+
+```bash
+# Remove example template 
+rm -rf plugins/scaffolder-backend-module-getconfluentcredentials/src/actions/example.test.ts 
+rm -rf plugins/scaffolder-backend-module-getconfluentcredentials/src/actions/example.ts
+```
+
+## Creating Custom Action Files
+
+We will create a new action file in the `plugins/scaffolder-backend-module-getconfluentcredentials/src/actions/` directory called `getConfluentCredentials.ts`.
+
+```bash
+# Create new action files
+mkdir -p plugins/scaffolder-backend-module-getconfluentcredentials/src/actions/
+touch plugins/scaffolder-backend-module-getconfluentcredentials/src/actions/getConfluentCredentials.ts
+```
+
+## Implementing the Custom Action
+
+Add following content to the `getConfluentCredentials.ts` file:
+
+```typescript {filename="plugins/scaffolder-backend-module-getconfluentcredentials/src/actions/getConfluentCredentials.ts"}
+import { createTemplateAction } from '@backstage/plugin-scaffolder-node';
 
 export const createGetConfluentCredentialsAction = () => {
   return createTemplateAction({
@@ -460,94 +488,6 @@ export const createGetConfluentCredentialsAction = () => {
 };
 ```
 
-This action:
-1. Creates a custom scaffolder action with ID `confluent:credentials:get`
-2. Defines the expected outputs (apiKey and apiSecret)
-3. Reads the credentials from environment variables
-4. Makes them available as outputs that can be used in subsequent template steps
-
-Create an `index.ts` file in the same directory to export the action:
-
-```bash
-touch packages/backend/src/plugins/scaffolder/actions/index.ts
-```
-
-```typescript {filename="packages/backend/src/plugins/scaffolder/actions/index.ts"}
-export { createGetConfluentCredentialsAction } from './getConfluentCredentials';
-```
-
-### 6.3 Register the Custom Action
-
-Now, let's register our custom action with the scaffolder plugin. Create a new file `packages/backend/src/plugins/scaffolder.ts` and modify it:
-
-```bash
-touch packages/backend/src/plugins/scaffolder.ts
-```
-
-```typescript {filename="packages/backend/src/plugins/scaffolder.ts"}
-import { CatalogClient } from '@backstage/catalog-client';
-import { createRouter } from '@backstage/plugin-scaffolder-backend';
-import { Router } from 'express';
-import type { PluginEnvironment } from '../types';
-import { ScmIntegrations } from '@backstage/integration';
-import { createBuiltinActions } from '@backstage/plugin-scaffolder-backend';
-import { createGetConfluentCredentialsAction } from './scaffolder/actions';
-
-export default async function createPlugin(
-  env: PluginEnvironment,
-): Promise<Router> {
-  const catalogClient = new CatalogClient({
-    discoveryApi: env.discovery,
-  });
-
-  const integrations = ScmIntegrations.fromConfig(env.config);
-
-  // Get all the default actions
-  const builtInActions = createBuiltinActions({
-    catalogClient,
-    integrations,
-    config: env.config,
-    reader: env.reader,
-  });
-
-  // Add our custom action to the list
-  const actions = [
-    ...builtInActions,
-    createGetConfluentCredentialsAction(),
-  ];
-
-  return await createRouter({
-    actions,
-    catalogClient,
-    logger: env.logger,
-    config: env.config,
-    database: env.database,
-    reader: env.reader,
-  });
-}
-```
-
-Add a new file `packages/backend/src/types.ts` for the plugin environment:
-
-```bash
-touch packages/backend/src/types.ts
-```
-
-```typescript {filename="packages/backend/src/types.ts"}
-import { Logger } from 'winston';
-import { Config } from '@backstage/config';
-import { CacheManager, PluginDatabaseManager, PluginEndpointDiscovery } from '@backstage/backend-common';
-
-export type PluginEnvironment = {
-  logger: Logger;
-  database: PluginDatabaseManager;
-  cache: CacheManager;
-  config: Config;
-  reader: any;
-  discovery: PluginEndpointDiscovery;
-}; 
-```
-
 ### 6.3 Add Confluent Cloud Credentials
 
 To interact with Confluent Cloud, you'll need to generate API keys through the Confluent Cloud console. Here's how:
@@ -581,12 +521,15 @@ Now, let's create templates for provisioning Confluent Cloud resources. We'll st
 
 ### 7.1 Create the Environment Template
 
-Create a directory for the environment template and a template definition file in `confluent-self-service-templates/environment-template/template.yaml`:
+Create a directory for the environment template `confluent-self-service-templates/environment-template/` and within that directory create a file called `template.yaml`:
 
 ```bash
 mkdir -p confluent-self-service-templates/environment-template/
 touch confluent-self-service-templates/environment-template/template.yaml
 ```
+
+
+Add following content to the `template.yaml` file:
 
 ```yaml {filename="confluent-self-service-templates/environment-template/template.yaml"}
 apiVersion: scaffolder.backstage.io/v1beta3
@@ -600,6 +543,7 @@ spec:
   type: service
 
   parameters:
+    # Define form fields that will be shown to users
     - title: Confluent Cloud Configuration
       required:
         - environment_name
@@ -609,11 +553,12 @@ spec:
           type: string
           description: Name of the Confluent Cloud environment.
   steps:
-    # Get Confluent credentials from environment variables
+    # Use our custom action to get Confluent credentials securely
     - id: get-credentials
       name: Get Confluent Credentials
       action: confluent:credentials:get
 
+    # Fetch template content for the new repository
     - id: fetch-repository
       name: Fetch Repository
       action: fetch:template
@@ -624,6 +569,7 @@ spec:
         values:
           environment_name: ${{ parameters.environment_name }}
 
+    # Create a new GitHub repository with the template content
     - id: publish
       name: Publish to GitHub
       action: publish:github
@@ -638,10 +584,11 @@ spec:
           teams: [guests]
         requiredApprovingReviewCount: 0
         secrets:
-          # Use the credentials from our custom action
+          # Pass Confluent credentials to the GitHub repository as secrets
           CONFLUENT_CLOUD_API_KEY: ${{ steps['get-credentials'].output.apiKey }}
           CONFLUENT_CLOUD_API_SECRET: ${{ steps['get-credentials'].output.apiSecret }}
 
+    # Register the new repository in the Backstage catalog
     - id: register
       name: Register in Backstage
       action: catalog:register
@@ -649,6 +596,7 @@ spec:
         repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
         catalogInfoPath: '/catalog-info.yaml'
         
+  # Define links that will be shown after template execution
   output:
     links:
       - title: Repository
@@ -662,14 +610,16 @@ Replace `YOUR_GITHUB_USERNAME` with your actual GitHub username.
 
 ### 7.2 Create the Environment Template Content
 
-Create a directory for the environment template content and a Terraform configuration file in `confluent-self-service-templates/environment-template/content/main.tf`:
+Create a directory for the environment template content  `confluent-self-service-templates/environment-template/content/` and within that directory create a Terraform configuration file called `main.tf`:
 
-```bash
+```bash 
 mkdir -p confluent-self-service-templates/environment-template/content
 touch confluent-self-service-templates/environment-template/content/main.tf
 ```
 
-```hcl
+Add following content to the `main.tf` file:
+
+```hcl {filename="confluent-self-service-templates/environment-template/content/main.tf"}
 terraform {
   required_providers {
     confluent = {
@@ -679,21 +629,24 @@ terraform {
   }
 }
 
+# Confluent provider will use API credentials from environment variables
 provider "confluent" {
   # The provider will automatically use CONFLUENT_CLOUD_API_KEY and CONFLUENT_CLOUD_API_SECRET
   # environment variables without explicit configuration
 }
 
+# Environment name is passed from the Backstage template
 variable "environment_name" {
   type    = string
   default = "${{ values.environment_name }}"
 }
 
+# Create the Confluent Cloud environment
 resource "confluent_environment" "this" {
   display_name = var.environment_name
 }
 
-# Add outputs to be used in documentation
+# Define outputs to be used in documentation
 output "environment_id" {
   value = confluent_environment.this.id
   description = "The ID of the created Confluent Cloud environment"
@@ -741,22 +694,27 @@ mkdir -p confluent-self-service-templates/environment-template/content/.github/w
 touch confluent-self-service-templates/environment-template/content/.github/workflows/terraform-deploy.yml
 ```
 
+Add following content to the `terraform-deploy.yml` file:
+
 ```yaml {filename="confluent-self-service-templates/environment-template/content/.github/workflows/terraform-deploy.yml"}
 name: "Terraform Deploy"
 
 on:
-  workflow_dispatch:
-  push:
+  workflow_dispatch:  # Allow manual triggering
+  push:               # Run on each code push
 
 permissions:
-  contents: write
+  contents: write     # Needed to write documentation back to the repo
 
 jobs:
   terraform:
     runs-on: ubuntu-latest
     env:
-      CONFLUENT_CLOUD_API_KEY: ${{ secrets.CONFLUENT_CLOUD_API_KEY }}
-      CONFLUENT_CLOUD_API_SECRET: ${{ secrets.CONFLUENT_CLOUD_API_SECRET }}
+      # The additional raw and endraw escape tags are needed as backstage uses the same replacement mechanism than
+      # github actions. We use them as a workaround to avoid the substitution by the backstage
+      # templating engine as we want to use the secrets from the repository in the github actions workflow.
+      CONFLUENT_CLOUD_API_KEY: {% raw %}${{ secrets.CONFLUENT_CLOUD_API_KEY }}{% endraw %}
+      CONFLUENT_CLOUD_API_SECRET: {% raw %}${{ secrets.CONFLUENT_CLOUD_API_SECRET }}{% endraw %}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -766,29 +724,34 @@ jobs:
         with:
           terraform_version: 1.0.0
 
+      # Initialize Terraform with required providers
       - name: Initialize Terraform
         working-directory: .
         run: terraform init
 
+      # Validate Terraform configuration
       - name: Validate Terraform
         working-directory: .
         run: terraform validate
 
+      # Create execution plan
       - name: Plan Terraform
         working-directory: .
         run: terraform plan -out=tfplan
 
+      # Apply the Terraform plan to create resources
       - name: Apply Terraform
         working-directory: .
         run: terraform apply -auto-approve tfplan
         
+      # Extract outputs and create documentation
       - name: Extract Terraform Outputs and Create Documentation
         run: |
-          # Properly capture terraform outputs
+          # Capture terraform outputs to use in documentation
           ENV_ID=$(terraform output -raw environment_id)
           ENV_NAME=$(terraform output -raw environment_name)
           
-          # Create documentation files
+          # Create documentation files with environment details
           mkdir -p docs
           
           cat > docs/environment-details.md << EOL
@@ -800,13 +763,19 @@ jobs:
           - **Environment ID**: ${ENV_ID}
           EOL
           
-          # Commit and push documentation
+          # Commit and push documentation back to the repository
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add docs/
           git commit -m "Update environment documentation [skip ci]"
           git push
 ```
+
+{{< callout type="info" >}}
+The additional raw and endraw escape tags are needed as backstage uses the same replacement mechanism than
+github actions. We use them as a workaround to avoid the substitution by the backstage
+{{< /callout >}}
+
 
 ### 7.4 Create Documentation Setup
 
@@ -882,6 +851,7 @@ spec:
   type: service
 
   parameters:
+    # Define form fields for cluster configuration
     - title: Confluent Cloud Configuration
       required:
         - cluster_name
@@ -892,6 +862,7 @@ spec:
           type: string
           description: Name of the Confluent Cloud cluster.
         environment_name:
+          # EntityPicker allows selecting from existing environments in the catalog
           title: Environment Name
           type: string
           description: Select the environment where this cluster should be deployed.
@@ -919,16 +890,19 @@ spec:
           default: SINGLE_ZONE
 
   steps:
+    # Get Confluent credentials securely
     - id: get-credentials
       name: Get Confluent Credentials
       action: confluent:credentials:get
             
+    # Log debugging information about the selected environment
     - id: parse-environment-name
       name: Parse Environment Name
       action: debug:log
       input:
         message: "Parsing environment reference: ${{ parameters.environment_name }}"
         
+    # Extract just the name from the entity reference
     - id: extract-environment-name
       name: Extract Environment Name
       action: debug:log
@@ -936,13 +910,12 @@ spec:
         message: |
           ${{ (parameters.environment_name | parseEntityRef).name }}
 
+    # Fetch template content for the new repository
     - id: fetch-template
       name: Fetch Repository
       action: fetch:template
       input:
         url: ./content
-        copyWithoutTemplating:
-          - terraform-deploy.yml
         values:
           cluster_name: ${{ parameters.cluster_name }}
           environment_name: ${{ (parameters.environment_name | parseEntityRef).name }}
@@ -950,6 +923,7 @@ spec:
           region: ${{ parameters.region }}
           availability: ${{ parameters.availability }}
 
+    # Create GitHub repository with the template content
     - id: publish
       name: Publish to GitHub
       action: publish:github
@@ -964,9 +938,11 @@ spec:
           teams: [guests]
         requiredApprovingReviewCount: 0
         secrets:
+          # Pass Confluent credentials to GitHub repository as secrets
           CONFLUENT_CLOUD_API_KEY: ${{ steps['get-credentials'].output.apiKey }}
           CONFLUENT_CLOUD_API_SECRET: ${{ steps['get-credentials'].output.apiSecret }}
 
+    # Register the new repository in Backstage catalog
     - id: register
       name: Register in Backstage
       action: catalog:register
@@ -974,6 +950,7 @@ spec:
         repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
         catalogInfoPath: '/catalog-info.yaml'
         
+  # Define links that will be shown after template execution
   output:
     links:
       - title: Repository
@@ -989,7 +966,7 @@ Replace `YOUR_GITHUB_USERNAME` with your actual GitHub username.
 
 Create a Terraform configuration in `confluent-self-service-templates/cluster-template/content/main.tf`:
 
-```hcl
+```hcl {filename="confluent-self-service-templates/cluster-template/content/main.tf"}
 terraform {
   required_providers {
     confluent = {
@@ -999,11 +976,13 @@ terraform {
   }
 }
 
+# Confluent provider will use API credentials from environment variables
 provider "confluent" {
   # The provider will automatically use CONFLUENT_CLOUD_API_KEY and CONFLUENT_CLOUD_API_SECRET
   # environment variables without explicit configuration
 }
 
+# Variables passed from the Backstage template
 variable "cluster_name" {
   type    = string
   default = "${{ values.cluster_name }}"
@@ -1029,11 +1008,12 @@ variable "availability" {
   default = "${{ values.availability }}"
 }
 
-# Get the environment ID from the environment name
+# Look up existing environment by name
 data "confluent_environment" "this" {
   display_name = var.environment_name
 }
 
+# Create Kafka cluster in the existing environment
 resource "confluent_kafka_cluster" "this" {
   display_name = var.cluster_name
   availability = var.availability
@@ -1046,7 +1026,7 @@ resource "confluent_kafka_cluster" "this" {
   }
 }
 
-# Add outputs to be used in documentation
+# Define outputs to be used in documentation
 output "cluster_id" {
   value = confluent_kafka_cluster.this.id
   description = "The ID of the created Confluent Cloud cluster"
@@ -1107,18 +1087,21 @@ Create a GitHub Actions workflow in `confluent-self-service-templates/cluster-te
 name: "Terraform Deploy"
 
 on:
-  workflow_dispatch:
-  push:
+  workflow_dispatch:  # Allow manual triggering
+  push:               # Run on each code push
 
 permissions:
-  contents: write
+  contents: write     # Needed to write documentation back to the repo
 
 jobs:
   terraform:
     runs-on: ubuntu-latest
     env:
-      CONFLUENT_CLOUD_API_KEY: ${{ secrets.CONFLUENT_CLOUD_API_KEY }}
-      CONFLUENT_CLOUD_API_SECRET: ${{ secrets.CONFLUENT_CLOUD_API_SECRET }}
+      # The additional raw and endraw escape tags are needed as backstage uses the same replacement mechanism than
+      # github actions. We use them as a workaround to avoid the substitution by the backstage
+      # templating engine as we want to use the secrets from the repository in the github actions workflow.
+      CONFLUENT_CLOUD_API_KEY: {% raw %}${{ secrets.CONFLUENT_CLOUD_API_KEY }}{% endraw %}
+      CONFLUENT_CLOUD_API_SECRET: {% raw %}${{ secrets.CONFLUENT_CLOUD_API_SECRET }}{% endraw %}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -1128,31 +1111,36 @@ jobs:
         with:
           terraform_version: 1.0.0
 
+      # Initialize Terraform with required providers
       - name: Initialize Terraform
         working-directory: .
         run: terraform init
 
+      # Validate Terraform configuration
       - name: Validate Terraform
         working-directory: .
         run: terraform validate
 
+      # Create execution plan
       - name: Plan Terraform
         working-directory: .
         run: terraform plan -out=tfplan
 
+      # Apply the Terraform plan to create resources
       - name: Apply Terraform
         working-directory: .
         run: terraform apply -auto-approve tfplan
         
+      # Extract outputs and create documentation
       - name: Extract Terraform Outputs and Create Documentation
         run: |
-          # Properly capture terraform outputs
+          # Capture terraform outputs to use in documentation
           CLUSTER_ID=$(terraform output -raw cluster_id)
           CLUSTER_NAME=$(terraform output -raw cluster_name)
           ENV_ID=$(terraform output -raw environment_id)
           ENV_NAME=$(terraform output -raw environment_name)
           
-          # Create documentation files
+          # Create documentation files with cluster details
           mkdir -p docs
           
           cat > docs/cluster-details.md << EOL
@@ -1166,13 +1154,18 @@ jobs:
           - **Environment ID**: ${ENV_ID}
           EOL
           
-          # Commit and push documentation
+          # Commit and push documentation back to the repository
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add docs/
           git commit -m "Update cluster documentation [skip ci]"
           git push
 ```
+
+{{< callout type="info" >}}
+The additional raw and endraw escape tags are needed as backstage uses the same replacement mechanism than
+github actions. We use them as a workaround to avoid the substitution by the backstage
+{{< /callout >}}
 
 ### 8.4 Create Documentation Setup for Clusters
 
@@ -1221,13 +1214,13 @@ catalog:
   locations:
     # ... existing locations ...
     
-    # Local example template
+    # Register environment template in the catalog
     - type: file
       target: ../../confluent-self-service-templates/environment-template/template.yaml
       rules:
         - allow: [Template]
 
-    # Add the new cluster template
+    # Register cluster template in the catalog
     - type: file
       target: ../../confluent-self-service-templates/cluster-template/template.yaml
       rules:
