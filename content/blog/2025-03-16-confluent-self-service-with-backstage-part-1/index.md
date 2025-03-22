@@ -773,18 +773,21 @@ jobs:
 
 {{< callout type="info" >}}
 The additional raw and endraw escape tags are needed as backstage uses the same replacement mechanism than
-github actions. We use them as a workaround to avoid the substitution by the backstage
+github actions. We use them as a workaround to avoid the substitution by the backstage templating engine 
+as we want to use the secrets from the repository in the github actions workflow.
 {{< /callout >}}
 
 
 ### 7.4 Create Documentation Setup
 
-Create a folder for the documentation and a `mkdocs.yml` file in `confluent-self-service-templates/environment-template/content/docs`:
+Create a folder for the documentation under `confluent-self-service-templates/environment-template/content/docs` and a `mkdocs.yml` file in that folder:
 
 ```bash
 mkdir -p confluent-self-service-templates/environment-template/content/docs
 touch confluent-self-service-templates/environment-template/content/docs/mkdocs.yml
 ```
+
+Add following content to the `mkdocs.yml` file:
 
 ```yaml {filename="confluent-self-service-templates/environment-template/content/docs/mkdocs.yml"}
 site_name: 'Confluent Cloud Environment'
@@ -825,19 +828,18 @@ See the [Environment Details](./environment-details.md) page for specific inform
 
 ## Step 8: Creating a Cluster Template
 
-Next, let's create a template for provisioning Confluent Cloud clusters within our environments.
+Next, let's create a similar template for provisioning Confluent Cloud clusters within our environments.
 
 ### 8.1 Create the Cluster Template
 
-Create a directory for the cluster template:
+Create a directory for the cluster template `confluent-self-service-templates/cluster-template/` and a template definition file `confluent-self-service-templates/cluster-template/template.yaml`:
 
 ```bash
-mkdir -p confluent-self-service-templates/cluster-template/content
-mkdir -p confluent-self-service-templates/cluster-template/content/.github/workflows
-mkdir -p confluent-self-service-templates/cluster-template/content/docs
+mkdir -p confluent-self-service-templates/cluster-template/
+touch confluent-self-service-templates/cluster-template/template.yaml
 ```
 
-Create a template definition in `confluent-self-service-templates/cluster-template/template.yaml`:
+Add following content to the `template.yaml` file:
 
 ```yaml {filename="confluent-self-service-templates/cluster-template/template.yaml"}
 apiVersion: scaffolder.backstage.io/v1beta3
@@ -961,6 +963,8 @@ spec:
 ```
 
 Replace `YOUR_GITHUB_USERNAME` with your actual GitHub username.
+
+
 
 ### 8.2 Create the Cluster Template Content
 
