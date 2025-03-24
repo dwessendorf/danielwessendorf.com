@@ -481,7 +481,7 @@ However, for our Confluent Cloud integration, we need a way to securely provide 
 
 2. **Use a secret manager** - Alternatively, we could create a similar custom action that integrates with a secret manager like HashiCorp Vault or AWS Secrets Manager. (More suitable for production environments)
 
-For this tutorial, we'll implement the first option.
+For this tutorial, we'll implement the first option. Besides the credentials, we also will retrieve the github username from the environment variables to create the github repository.
 
 ### 5.2 Create the Custom Action
 
@@ -601,7 +601,7 @@ CONFLUENT_CLOUD_API_KEY=your_confluent_api_key
 CONFLUENT_CLOUD_API_SECRET=your_confluent_api_secret
 ```
 
-You can also set these as environment variables directly:
+Alternatively, you can set these as environment variables directly:
 
 ```bash
 export CONFLUENT_CLOUD_API_KEY=your_confluent_api_key
@@ -611,7 +611,7 @@ export CONFLUENT_CLOUD_API_SECRET=your_confluent_api_secret
 ## Step 6: Creating Templates for provisioning Confluent Cloud Environments
 
 Now, let's create templates for provisioning Confluent Cloud resources. We'll start with an environment template. We also use our custom action 
-in the template to get the Confluent Cloud credentials from the environment variables.
+in the template to get the Confluent Cloud credentials and the github username from the environment variables.
 
 ### 6.1 Create the Environment Template
 
@@ -703,11 +703,10 @@ spec:
 
 ### 6.2 Create the Environment Template Content
 
-The above tempalte will create a new Github repository and the necessary Infrastructure as Code (IaC)-files to provision a Confluent Cloud environment.
-The github repository also will contain an github actions workflow to provision the environment and a documentation page that will be created in the github actions workflow.
-These files are provided as content templates that will be used to create the actual files in the github repository.
+The above template will create a new Github repository and the necessary Infrastructure-as-Code (IaC)-files to provision a Confluent Cloud environment.
+The github repository will also contain an github actions workflow to provision the environment and a documentation page that will be created during the github actions workflow run. These files are provided as content templates that will be used to create the actual files in the github repository.
 
-Create a directory for the environment template content  `confluent-self-service-templates/environment-template/content/`.
+Create a directory for the environment template content under `confluent-self-service-templates/environment-template/content/`.
 Within that directory create a Terraform configuration file called `main.tf`:
 
 ```bash 
@@ -756,7 +755,7 @@ output "environment_name" {
 }
 ```
 
-Create a catalog info file in `confluent-self-service-templates/environment-template/content/catalog-info.yaml`:
+Create a catalog info file named `catalog-info.yaml` in the content directory :
 
 ```bash
 touch confluent-self-service-templates/environment-template/content/catalog-info.yaml
@@ -798,7 +797,7 @@ The `backstage.io/techdocs-ref` annotation is used to specify the directory cont
 ### 6.3 Create GitHub Actions Workflow
 
 Create a folder for the GitHub Actions workflow `confluent-self-service-templates/environment-template/content/.github/workflows/`.
-Add a workflow configurationfile `terraform-deploy.yml` to that folder:
+Add a workflow configuration file named `terraform-deploy.yml` to that folder:
 
 ```bash
 mkdir -p confluent-self-service-templates/environment-template/content/.github/workflows
@@ -919,7 +918,7 @@ jobs:
         uses: EndBug/add-and-commit@v9
         with:
           message: 'Add automated changes'
-          add: '.'
+          add: 'docs/.'
           push: true
           default_author: github_actions
 ```
@@ -933,7 +932,7 @@ as we want to use the secrets from the repository in the github actions workflow
 
 ### 6.4 Create Documentation Setup
 
-When the user initiates the template, some information like th environment id is not yet present and cannot be registered in the catalog.
+When the user initiates the github repo, some information like the environment id is not yet present and cannot be registered in the catalog.
 To get full transparency, we need to create a documentation page that will be dynamically created in the github actions workflow and stored
 in the repository once the environment is created.
 
@@ -965,7 +964,7 @@ markdown_extensions:
   - pymdownx.superfences
 ```
 
-Create an initial documentation file in `confluent-self-service-templates/environment-template/content/docs/index.md`:
+Create an initial documentation file in `index.md` in the docs directory:
 
 ```bash
 touch confluent-self-service-templates/environment-template/content/docs/index.md
@@ -992,7 +991,7 @@ Next, let's create a similar template for provisioning Confluent Cloud clusters 
 
 ### 7.1 Create the Cluster Template
 
-Create a directory for the cluster template `confluent-self-service-templates/cluster-template/` and a template definition file `confluent-self-service-templates/cluster-template/template.yaml`:
+Create a directory for the cluster template `confluent-self-service-templates/cluster-template/` and a template definition file `template.yaml` within that directory:
 
 ```bash
 mkdir -p confluent-self-service-templates/cluster-template/
@@ -1403,7 +1402,7 @@ jobs:
         uses: EndBug/add-and-commit@v9
         with:
           message: 'Add automated changes'
-          add: '.'
+          add: 'docs/.'
           push: true
           default_author: github_actions
 ```
