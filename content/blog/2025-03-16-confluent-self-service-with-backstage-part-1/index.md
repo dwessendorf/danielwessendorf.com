@@ -195,14 +195,11 @@ export AUTH_GITHUB_CLIENT_SECRET=your_client_secret
 
 Modify your `packages/app/src/App.tsx` file to add the sign-in page component and GitHub Actions plugin:
 
-```typescript {filename="packages/app/src/App.tsx", hl_lines=[4, 6, 7, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,  48, 49, 50, 51, 52] }
+```typescript {filename="packages/app/src/App.tsx", hl_lines=[4,29,30,31,32,33,34, 35,36,37,38] }
 // Other imports...
 import { catalogEntityCreatePermission } from '@backstage/plugin-catalog-common/alpha';
 
 import { githubAuthApiRef } from '@backstage/core-plugin-api';
-// Import the GitHub Actions plugin components
-import { EntityGithubActionsContent } from '@backstage-community/plugin-github-actions';
-import { EntityLayout } from '@backstage/plugin-catalog';
 
 const app = createApp({
   apis,
@@ -241,19 +238,90 @@ const app = createApp({
   },
 });
 
-const routes = (
-  <FlatRoutes>
-    {/* ... other routes ... */}
-    <Route path="/catalog/:namespace/:kind/:name" element={<CatalogEntityPage />}>
-      {/* Add the GitHub Actions tab to entity pages */}
-      <EntityLayout.Route path="/actions" title="Actions">
-        <EntityGithubActionsContent />
-      </EntityLayout.Route>
-    </Route>
-    {/* ... other routes ... */}
-  </FlatRoutes>
-);
+
 ```
+
+Modify your `/packages/app/src/components/catalog/EntityPage.tsx` file add the cicd screen content and configuration for the default entity page:
+
+```typescript {filename="/packages/app/src/components/catalog/EntityPage.tsx", hl_lines=[15,16,17,63,64,65]}
+// Other imports and code lines
+
+const techdocsContent = (
+  <EntityTechdocsContent>
+    <TechDocsAddons>
+      <ReportIssue />
+    </TechDocsAddons>
+  </EntityTechdocsContent>
+);
+
+const cicdContent = (
+  // This is an example of how you can implement your company's logic in entity page.
+  // You can for example enforce that all components of type 'service' should use GitHubActions
+  <EntitySwitch>
+    <EntitySwitch.Case if={isGithubActionsAvailable}>
+      <EntityGithubActionsContent />
+    </EntitySwitch.Case>
+
+    <EntitySwitch.Case>
+      <EmptyState
+        title="No CI/CD available for this entity"
+        missing="info"
+        description="You need to add an annotation to your component if you want to enable CI/CD for it. You can read more about annotations in Backstage by clicking the button below."
+        action={
+          <Button
+            variant="contained"
+            color="primary"
+            href="https://backstage.io/docs/features/software-catalog/well-known-annotations"
+          >
+            Read more
+          </Button>
+        }
+      />
+    </EntitySwitch.Case>
+  </EntitySwitch>
+);
+
+const entityWarningContent = (
+  <>
+    <EntitySwitch>
+
+// More Lines ....
+
+    <EntityLayout.Route path="/docs" title="Docs">
+      {techdocsContent}
+    </EntityLayout.Route>
+  </EntityLayout>
+);
+
+/**
+ * NOTE: This page is designed to work on small screens such as mobile devices.
+ * This is based on Material UI Grid. If breakpoints are used, each grid item must set the `xs` prop to a column size or to `true`,
+ * since this does not default. If no breakpoints are used, the items will equitably share the available space.
+ * https://material-ui.com/components/grid/#basic-grid.
+ */
+
+const defaultEntityPage = (
+  <EntityLayout>
+    <EntityLayout.Route path="/" title="Overview">
+      {overviewContent}
+    </EntityLayout.Route>
+
+    <EntityLayout.Route path="/ci-cd" title="CI/CD">
+      {cicdContent}
+    </EntityLayout.Route>
+
+    <EntityLayout.Route path="/docs" title="Docs">
+      {techdocsContent}
+    </EntityLayout.Route>
+  </EntityLayout>
+);
+
+const componentPage = (
+
+// More lines following
+
+```
+
 
 Install the required packages for the frontend:
 
@@ -764,11 +832,17 @@ jobs:
       # Extract outputs and create documentation
       - name: Extract Terraform Outputs and Create Documentation
         run: |
-          # Capture terraform outputs to use in documentation
-          ENV_ID=$(terraform output -raw environment_id)
-          ENV_NAME=$(terraform output -raw environment_name)
+          # Use the correct terraform binary path
+          TERRAFORM_BIN="${TERRAFORM_CLI_PATH}/terraform-bin"
           
-          # Create documentation files with environment details
+          # Properly capture terraform outputs
+          ENV_ID=$(${TERRAFORM_BIN} output -raw environment_id)
+          ENV_NAME=$(${TERRAFORM_BIN} output -raw environment_name)
+          
+          echo "Environment ID: $ENV_ID"
+          echo "Environment Name: $ENV_NAME"
+          
+          # Create the files with the correct content
           mkdir -p docs
           
           cat > docs/environment-details.md << EOL
@@ -778,14 +852,50 @@ jobs:
           
           - **Name**: ${ENV_NAME}
           - **Environment ID**: ${ENV_ID}
+          
+          The Environment ID was automatically populated after the Terraform deployment completed successfully.
+          
+          ## Access
+          
+          Access to this environment is controlled via Confluent Cloud. Please contact the administrators to request access.
           EOL
           
-          # Commit and push documentation back to the repository
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          git add docs/
-          git commit -m "Update environment documentation [skip ci]"
-          git push
+          cat > docs/operations.md << EOL
+          # Operations Guide
+          
+          ## Accessing the Environment
+          
+          To access this environment in the Confluent Cloud Console:
+          
+          1. Log in to [Confluent Cloud](https://confluent.cloud/)
+          2. Navigate to Environments
+          3. Select "${ENV_NAME}" from the list
+          
+          ## Using the CLI
+          
+          You can use the Confluent CLI to interact with this environment:
+          
+          \`\`\`bash
+          # Set up authentication
+          confluent login
+          
+          # List available environments
+          confluent environment list
+          
+          # Select this environment
+          confluent environment use ${ENV_ID}
+          \`\`\`
+          
+          You can use the environment ID listed above.
+          EOL
+        # Push documentation to the repository
+      - name: Push changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'Add automated changes'
+          add: '.'
+          push: true
+          default_author: github_actions
 ```
 
 {{< callout type="info" >}}
@@ -836,17 +946,18 @@ touch confluent-self-service-templates/environment-template/content/docs/index.m
 ```
 
 ```markdown {filename="confluent-self-service-templates/environment-template/content/docs/index.md"}
-# Confluent Cloud Environment
+# Confluent Cloud Environment: ${{ values.environment_name }}
 
-This is the documentation for your Confluent Cloud environment.
+This documentation provides details about the Confluent Cloud environment and how to manage it.
 
 ## Overview
 
-This environment was created using Backstage and Terraform. The environment is managed through Infrastructure as Code, ensuring consistency and repeatability.
+This environment was provisioned using Terraform and is managed as Infrastructure as Code.
 
-## Details
+## Quick Links
 
-See the [Environment Details](./environment-details.md) page for specific information about this environment.
+- [Environment Details](environment-details.md)
+- [Operations Guide](operations.md)
 ```
 
 ## Step 8: Creating a Cluster Template
@@ -1189,13 +1300,22 @@ jobs:
       # Extract outputs and create documentation
       - name: Extract Terraform Outputs and Create Documentation
         run: |
-          # Capture terraform outputs to use in documentation
-          CLUSTER_ID=$(terraform output -raw cluster_id)
-          CLUSTER_NAME=$(terraform output -raw cluster_name)
-          ENV_ID=$(terraform output -raw environment_id)
-          ENV_NAME=$(terraform output -raw environment_name)
+          # Use the correct terraform binary path
+          TERRAFORM_BIN="${TERRAFORM_CLI_PATH}/terraform-bin"
           
-          # Create documentation files with cluster details
+          # Properly capture terraform outputs
+          CLUSTER_ID=$(${TERRAFORM_BIN} output -raw cluster_id)
+          CLUSTER_NAME=$(${TERRAFORM_BIN} output -raw cluster_name)
+          BOOTSTRAP_ENDPOINT=$(${TERRAFORM_BIN} output -raw bootstrap_endpoint)
+          ENV_ID=$(${TERRAFORM_BIN} output -raw environment_id)
+          ENV_NAME=$(${TERRAFORM_BIN} output -raw environment_name)
+          
+          echo "Cluster ID: $CLUSTER_ID"
+          echo "Cluster Name: $CLUSTER_NAME"
+          echo "Environment ID: $ENV_ID"
+          echo "Environment Name: $ENV_NAME"
+          
+          # Create the files with the correct content
           mkdir -p docs
           
           cat > docs/cluster-details.md << EOL
@@ -1205,16 +1325,61 @@ jobs:
           
           - **Name**: ${CLUSTER_NAME}
           - **Cluster ID**: ${CLUSTER_ID}
-          - **Environment**: ${ENV_NAME}
+          - **Bootstrap Endpoint**: ${BOOTSTRAP_ENDPOINT}
+          - **Parent Environment**: ${ENV_NAME}
           - **Environment ID**: ${ENV_ID}
+          
+          The Cluster ID and Bootstrap Endpoint were automatically populated after the Terraform deployment completed successfully.
+          
+          ## Access
+          
+          Access to this cluster is controlled via Confluent Cloud. Please contact the administrators to request access.
           EOL
           
-          # Commit and push documentation back to the repository
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          git add docs/
-          git commit -m "Update cluster documentation [skip ci]"
-          git push
+          cat > docs/operations.md << EOL
+          # Operations Guide
+          
+          ## Accessing the Cluster
+          
+          To access this cluster in the Confluent Cloud Console:
+          
+          1. Log in to [Confluent Cloud](https://confluent.cloud/)
+          2. Navigate to Environments
+          3. Select "${ENV_NAME}" from the list
+          4. Click on the cluster "${CLUSTER_NAME}"
+          
+          ## Using the CLI
+          
+          You can use the Confluent CLI to interact with this cluster:
+          
+          \`\`\`bash
+          # Set up authentication
+          confluent login
+          
+          # List available environments
+          confluent environment list
+          
+          # Select the environment
+          confluent environment use ${ENV_ID}
+          
+          # List clusters in the environment
+          confluent kafka cluster list
+          
+          # Select this cluster
+          confluent kafka cluster use ${CLUSTER_ID}
+          \`\`\`
+          
+          You can use the cluster ID listed above.
+          EOL
+
+      # Push changes to the repository
+      - name: Push changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'Add automated changes'
+          add: '.'
+          push: true
+          default_author: github_actions
 ```
 
 {{< callout type="info" >}}
@@ -1246,17 +1411,18 @@ markdown_extensions:
 Create an initial documentation file in `confluent-self-service-templates/cluster-template/content/docs/index.md`:
 
 ```markdown
-# Confluent Cloud Cluster
+# Confluent Cloud Cluster: ${{ values.cluster_name }}
 
-This is the documentation for your Confluent Cloud cluster.
+This documentation provides details about the Confluent Cloud cluster and how to manage it.
 
 ## Overview
 
-This cluster was created using Backstage and Terraform. The cluster is managed through Infrastructure as Code, ensuring consistency and repeatability.
+This cluster was provisioned using Terraform and is managed as Infrastructure as Code.
 
-## Details
+## Quick Links
 
-See the [Cluster Details](./cluster-details.md) page for specific information about this cluster.
+- [Cluster Details](cluster-details.md)
+- [Operations Guide](operations.md) 
 ```
 
 ## Step 9: Update App Configuration
