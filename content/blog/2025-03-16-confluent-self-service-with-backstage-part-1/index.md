@@ -78,7 +78,9 @@ After the installation completes, navigate to your new project:
 cd confluent-backstage
 ```
 
-## Step 2: Setting up a GitHub Personal Access Token
+These variables will be used in various configuration files and templates to avoid hardcoding personal information.
+
+## Step 2: Setting up a GitHub Personal Access Token and Github Environment Variables
 
 Before we proceed to GitHub authentication, you'll need to create a personal access token that allows Backstage to interact with GitHub's API. This is necessary for repository creation and other GitHub operations.
 
@@ -94,19 +96,28 @@ Before we proceed to GitHub authentication, you'll need to create a personal acc
    - Metadata: Read-only
 7. Generate the token and copy it immediately (you won't be able to see it again)
 
-Now, set this token as an environment variable:
+Now, set this token, your github username, display name and your (with github associated) email-address as environment variables:
 
 ```bash
-export GITHUB_TOKEN=your_personal_access_token
+export GITHUB_TOKEN="your_personal_access_token"
+export GITHUB_USERNAME="your-github-username"
+export USER_DISPLAY_NAME="Your Name"
+export USER_EMAIL="your.github-email@example.com"
 ```
 
-To make this persistent, add it to your `.env` file:
 
-```
-GITHUB_TOKEN=your_personal_access_token
+If you want to make this persistent, you can also add it to your `.env` file:
+
+```bash
+# GitHub configuration
+echo "GITHUB_TOKEN=$GITHUB_TOKEN" >> .env
+echo "GITHUB_USERNAME=$GITHUB_USERNAME" >> .env
+echo "USER_DISPLAY_NAME=$USER_DISPLAY_NAME" >> .env
+echo "USER_EMAIL=$USER_EMAIL" >> .env
 ```
 
-Also check the `app-config.yaml` file that backstage uses this token for GitHub integration (Should be there by default):
+
+Also check the `app-config.yaml` file that backstage is using the github token environment variable for its GitHub integration (Should be there by default):
 
 ```yaml {filename="app-config.yaml"}
 integrations:
@@ -372,13 +383,13 @@ Add following content to the `org.yaml` file:
 apiVersion: backstage.io/v1alpha1
 kind: User
 metadata:
-  name: YOUR_GITHUB_USERNAME
+  name: ${GITHUB_USERNAME}
   annotations:
-    github.com/login: YOUR_GITHUB_USERNAME
+    github.com/login: ${GITHUB_USERNAME}
 spec:
   profile:
-    displayName: "Your Name"
-    email: "your.email@example.com"
+    displayName: "${USER_DISPLAY_NAME}"
+    email: "${USER_EMAIL}"
   memberOf: [guests]
 
 ---
@@ -391,7 +402,7 @@ spec:
   children: []
 ```
 
-Make sure to replace `YOUR_GITHUB_USERNAME`, `Your Name`, and `your.email@example.com` with your actual GitHub username and contact details.
+Make sure your environment variables are properly set before loading this file into Backstage.
 
 ### Step 4.2 : Creating first static software catalog entry for Confluent Cloud
 
@@ -480,7 +491,7 @@ The Backstage Scaffolder plugin comes with a set of default actions that can be 
 # Create a new scaffolder backend module
 yarn backstage-cli new
 # When prompted, choose scaffolder-backend-module 
-# Write getconfluentcredentials as the module id
+# Write getenvironmentvariables as the module id
 ```
 
 ### 5.3 Cleaning Up Example Files
@@ -489,28 +500,28 @@ The backstage cli creates a new scaffolder backend module with example files tha
 
 ```bash
 # Remove example template 
-rm -rf plugins/scaffolder-backend-module-getconfluentcredentials/src/actions/example.test.ts 
-rm -rf plugins/scaffolder-backend-module-getconfluentcredentials/src/actions/example.ts
+rm -rf plugins/scaffolder-backend-module-getenvironmentvariables/src/actions/example.test.ts 
+rm -rf plugins/scaffolder-backend-module-getenvironmentvariables/src/actions/example.ts
 ```
 
 ### 5.4 Creating Custom Action Files
 
-We will create a new action file in the `plugins/scaffolder-backend-module-getconfluentcredentials/src/actions/` directory called `getConfluentCredentials.ts`.
+We will create a new action file in the `plugins/scaffolder-backend-module-getenvironmentvariables/src/actions/` directory called `getEnvironmentVariables.ts`.
 
 ```bash
 # Create new action files
-mkdir -p plugins/scaffolder-backend-module-getconfluentcredentials/src/actions/
-touch plugins/scaffolder-backend-module-getconfluentcredentials/src/actions/getConfluentCredentials.ts
+mkdir -p plugins/scaffolder-backend-module-getenvironmentvariables/src/actions/
+touch plugins/scaffolder-backend-module-getenvironmentvariables/src/actions/getEnvironmentVariables.ts
 ```
 
-Add following content to the `getConfluentCredentials.ts` file:
+Add following content to the `getEnvironmentVariables.ts` file:
 
-```typescript {filename="plugins/scaffolder-backend-module-getconfluentcredentials/src/actions/getConfluentCredentials.ts"}
+```typescript {filename="plugins/scaffolder-backend-module-getenvironmentvariables/src/actions/getEnvironmentVariables.ts"}
 import { createTemplateAction } from '@backstage/plugin-scaffolder-node';
 
-export const createGetConfluentCredentialsAction = () => {
+export const createGetEnvironmentVariablesAction = () => {
   return createTemplateAction({
-    id: 'confluent:credentials:get',
+    id: 'confluent:environmentvariables:get',
     description: 'Retrieves Confluent API credentials from environment variables',
     
     schema: {
@@ -532,6 +543,11 @@ export const createGetConfluentCredentialsAction = () => {
             title: 'Confluent API Secret',
             description: 'The Confluent API Secret retrieved from environment variables',
           },
+          githubUsername: {
+            type: 'string',
+            title: 'GitHub Username',
+            description: 'The GitHub username retrieved from environment variables',
+          },
         },
       },
     },
@@ -539,6 +555,7 @@ export const createGetConfluentCredentialsAction = () => {
     async handler(ctx) {
       const apiKey = process.env.CONFLUENT_CLOUD_API_KEY;
       const apiSecret = process.env.CONFLUENT_CLOUD_API_SECRET;
+      const githubUsername = process.env.GITHUB_USERNAME;
       
       if (!apiKey || !apiSecret) {
         throw new Error(
@@ -547,10 +564,18 @@ export const createGetConfluentCredentialsAction = () => {
         );
       }
       
-      ctx.logger.info('Successfully retrieved Confluent API credentials from environment variables');
+      if (!githubUsername) {
+        throw new Error(
+          'GitHub username not found in environment variables. ' +
+          'Please set GITHUB_USERNAME.'
+        );
+      }
+      
+      ctx.logger.info('Successfully retrieved credentials from environment variables');
       
       ctx.output('apiKey', apiKey);
       ctx.output('apiSecret', apiSecret);
+      ctx.output('githubUsername', githubUsername);
     },
   });
 };
@@ -620,10 +645,10 @@ spec:
           type: string
           description: Name of the Confluent Cloud environment.
   steps:
-    # Use our custom action to get Confluent credentials securely
-    - id: get-credentials
-      name: Get Confluent Credentials
-      action: confluent:credentials:get
+    # Use our custom action to get environment variables securely
+    - id: get-environmentvariables
+      name: Get Environment Variables
+      action: confluent:environmentvariables:get
 
     # Fetch template content for the new repository
     - id: fetch-repository
@@ -635,6 +660,7 @@ spec:
           - terraform-deploy.yml
         values:
           environment_name: ${{ parameters.environment_name }}
+          githubUsername: ${{ steps['get-environmentvariables'].output.githubUsername }}
 
     # Create a new GitHub repository with the template content
     - id: publish
@@ -643,7 +669,7 @@ spec:
       input:
         allowedHosts: ['github.com']
         description: "Terraform for Confluent Cloud Environment"
-        repoUrl: "github.com?owner=YOUR_GITHUB_USERNAME&repo=cc-env-${{ parameters.environment_name }}"
+        repoUrl: "github.com?owner=${{ steps['get-environmentvariables'].output.githubUsername }}&repo=cc-env-${{ parameters.environment_name }}"
         defaultBranch: main
         repoVisibility: public
         requireCodeOwnerReviews: false
@@ -652,8 +678,8 @@ spec:
         requiredApprovingReviewCount: 0
         secrets:
           # Pass Confluent credentials to the GitHub repository as secrets
-          CONFLUENT_CLOUD_API_KEY: ${{ steps['get-credentials'].output.apiKey }}
-          CONFLUENT_CLOUD_API_SECRET: ${{ steps['get-credentials'].output.apiSecret }}
+          CONFLUENT_CLOUD_API_KEY: ${{ steps['get-environmentvariables'].output.apiKey }}
+          CONFLUENT_CLOUD_API_SECRET: ${{ steps['get-environmentvariables'].output.apiSecret }}
 
     # Register the new repository in the Backstage catalog
     - id: register
@@ -673,7 +699,7 @@ spec:
         entityRef: ${{ steps['register'].output.entityRef }}
 ```
 
-Replace `YOUR_GITHUB_USERNAME` with your actual GitHub username.
+
 
 ### 6.2 Create the Environment Template Content
 
@@ -751,7 +777,7 @@ metadata:
       title: Confluent Cloud Console
       icon: dashboard
   annotations:
-    github.com/project-slug: YOUR_GITHUB_USERNAME/cc-env-${{ values.environment_name }}
+    github.com/project-slug: ${{ values.githubUsername }}/cc-env-${{ values.environment_name }}
     backstage.io/techdocs-ref: dir:.
 spec:
   type: confluent-environment
@@ -760,7 +786,7 @@ spec:
   system: confluent-cloud
 ```
 
-Replace `YOUR_GITHUB_USERNAME` with your actual GitHub username.
+
 
 {{< callout type="info" >}}
 The `github.com/project-slug` annotation is used to link the environment to the GitHub repository. This also enables backstage
@@ -1026,10 +1052,10 @@ spec:
           default: SINGLE_ZONE
 
   steps:
-    # Get Confluent credentials securely
-    - id: get-credentials
-      name: Get Confluent Credentials
-      action: confluent:credentials:get
+    # Get Environment Variables securely
+    - id: get-environmentvariables
+      name: Get Environment Variables
+      action: confluent:environmentvariables:get
             
     # Log debugging information about the selected environment
     - id: parse-environment-name
@@ -1058,6 +1084,7 @@ spec:
           cloud_provider: ${{ parameters.cloud_provider }}
           region: ${{ parameters.region }}
           availability: ${{ parameters.availability }}
+          githubUsername: ${{ steps['get-environmentvariables'].output.githubUsername }}
 
     # Create GitHub repository with the template content
     - id: publish
@@ -1066,7 +1093,7 @@ spec:
       input:
         allowedHosts: ['github.com']
         description: "Terraform for Confluent Cloud Cluster"
-        repoUrl: "github.com?owner=YOUR_GITHUB_USERNAME&repo=cc-cluster-${{ parameters.cluster_name }}"
+        repoUrl: "github.com?owner=${{ steps['get-environmentvariables'].output.githubUsername }}&repo=cc-cluster-${{ parameters.cluster_name }}"
         defaultBranch: main
         repoVisibility: public
         requireCodeOwnerReviews: false
@@ -1075,8 +1102,8 @@ spec:
         requiredApprovingReviewCount: 0
         secrets:
           # Pass Confluent credentials to GitHub repository as secrets
-          CONFLUENT_CLOUD_API_KEY: ${{ steps['get-credentials'].output.apiKey }}
-          CONFLUENT_CLOUD_API_SECRET: ${{ steps['get-credentials'].output.apiSecret }}
+          CONFLUENT_CLOUD_API_KEY: ${{ steps['get-environmentvariables'].output.apiKey }}
+          CONFLUENT_CLOUD_API_SECRET: ${{ steps['get-environmentvariables'].output.apiSecret }}
 
     # Register the new repository in Backstage catalog
     - id: register
@@ -1096,7 +1123,7 @@ spec:
         entityRef: ${{ steps['register'].output.entityRef }}
 ```
 
-Replace `YOUR_GITHUB_USERNAME` with your actual GitHub username.
+
 
 {{< callout type="info" >}}
 The `EntityPicker` field is a backstage standard component that allows to select an entity from the catalog.
@@ -1228,7 +1255,7 @@ metadata:
       title: Confluent Cloud Console
       icon: dashboard
   annotations:
-    github.com/project-slug: YOUR_GITHUB_USERNAME/cc-cluster-${{ values.cluster_name }}
+    github.com/project-slug: ${{ values.githubUsername }}/cc-cluster-${{ values.cluster_name }}
     backstage.io/techdocs-ref: dir:.
 spec:
   type: confluent-cluster
@@ -1239,7 +1266,6 @@ spec:
     - component:${{ values.environment_name }}
 ```
 
-Replace `YOUR_GITHUB_USERNAME` with your actual GitHub username.
 
 {{< callout type="info" >}}
 The `dependsOn` annotation is used to build the backstage internal dependency graph.
