@@ -204,7 +204,7 @@ export AUTH_GITHUB_CLIENT_SECRET=your_client_secret
 
 ### 3.3 Update Your App Configuration
 
-Modify your `packages/app/src/App.tsx` file to add the sign-in page component and GitHub Actions plugin:
+Modify your `packages/app/src/App.tsx` file to add the sign-in page component :
 
 ```typescript {filename="packages/app/src/App.tsx", hl_lines=[4,29,30,31,32,33,34, 35,36,37,38] }
 // Other imports...
@@ -252,7 +252,7 @@ const app = createApp({
 
 ```
 
-Modify your `/packages/app/src/components/catalog/EntityPage.tsx` file add the cicd screen content and configuration for the default entity page:
+Modify your `/packages/app/src/components/catalog/EntityPage.tsx` file and add the content elements for the cicd tab. We also add an configuration flag for to enable it in the default entity page:
 
 ```typescript {filename="/packages/app/src/components/catalog/EntityPage.tsx", hl_lines=[15,16,17,63,64,65]}
 // Other imports and code lines
@@ -358,9 +358,7 @@ Install the backend plugins:
 yarn --cwd packages/backend add @backstage/plugin-auth-backend @backstage/plugin-auth-backend-module-github-provider
 ```
 
-Now, when you navigate to the entity page for a repository managed by Backstage, you'll see an "Actions" tab that shows the GitHub Actions workflows for that repository.
-
-![](/images/blog/backstage-github-actions.png)
+Now, when you navigate to the entity page for a repository managed by Backstage, you'll see an "CICD" tab that shows the GitHub Actions workflows for that repository.
 
 {{< callout type="info" >}}
   This integration is particularly valuable for our use case as it allows users to monitor the status of their Terraform deployments directly in Backstage. They can track when an environment or cluster is being provisioned and see any errors that might occur during the process without needing to navigate to GitHub.
@@ -402,7 +400,7 @@ spec:
   children: []
 ```
 
-Make sure your environment variables are properly set before loading this file into Backstage.
+Make sure your environment variables are properly set before trying to log-in into Backstage.
 
 ### Step 4.2 : Creating first static software catalog entry for Confluent Cloud
 
@@ -522,7 +520,7 @@ import { createTemplateAction } from '@backstage/plugin-scaffolder-node';
 export const createGetEnvironmentVariablesAction = () => {
   return createTemplateAction({
     id: 'confluent:environmentvariables:get',
-    description: 'Retrieves Confluent API credentials from environment variables',
+    description: 'Retrieves Confluent API credentials and github username from environment variables',
     
     schema: {
       input: {
@@ -536,17 +534,17 @@ export const createGetEnvironmentVariablesAction = () => {
           apiKey: {
             type: 'string',
             title: 'Confluent API Key',
-            description: 'The Confluent API Key retrieved from environment variables',
+            description: 'The Confluent API Key retrieved from an environment variable',
           },
           apiSecret: {
             type: 'string',
             title: 'Confluent API Secret',
-            description: 'The Confluent API Secret retrieved from environment variables',
+            description: 'The Confluent API Secret retrieved from an environment variable',
           },
           githubUsername: {
             type: 'string',
             title: 'GitHub Username',
-            description: 'The GitHub username retrieved from environment variables',
+            description: 'The GitHub username retrieved from an environment variable',
           },
         },
       },
@@ -613,7 +611,7 @@ export CONFLUENT_CLOUD_API_SECRET=your_confluent_api_secret
 Now, let's create templates for provisioning Confluent Cloud resources. We'll start with an environment template. We also use our custom action 
 in the template to get the Confluent Cloud credentials and the github username from the environment variables.
 
-### 6.1 Create the Environment Template
+### 6.1 Create the Environment Template definition file
 
 Create a directory for the environment template `confluent-self-service-templates/environment-template/` and within that directory create a file called `template.yaml`:
 
@@ -701,7 +699,7 @@ spec:
 
 
 
-### 6.2 Create the Environment Template Content
+### 6.2 Create the terraform configuration file for the Environment Template
 
 The above template will create a new Github repository and the necessary Infrastructure-as-Code (IaC)-files to provision a Confluent Cloud environment.
 The github repository will also contain an github actions workflow to provision the environment and a documentation page that will be created during the github actions workflow run. These files are provided as content templates that will be used to create the actual files in the github repository.
@@ -794,7 +792,7 @@ The `backstage.io/techdocs-ref` annotation is used to specify the directory cont
 {{< /callout >}}
 
 
-### 6.3 Create GitHub Actions Workflow
+### 6.3 Create GitHub Actions Workflow for the Environment Template
 
 Create a folder for the GitHub Actions workflow `confluent-self-service-templates/environment-template/content/.github/workflows/`.
 Add a workflow configuration file named `terraform-deploy.yml` to that folder:
@@ -930,7 +928,7 @@ as we want to use the secrets from the repository in the github actions workflow
 {{< /callout >}}
 
 
-### 6.4 Create Documentation Setup
+### 6.4 Create Documentation Setup for the Environment Template
 
 When the user initiates the github repo, some information like the environment id is not yet present and cannot be registered in the catalog.
 To get full transparency, we need to create a documentation page that will be dynamically created in the github actions workflow and stored
@@ -985,11 +983,11 @@ This environment was provisioned using Terraform and is managed as Infrastructur
 - [Operations Guide](operations.md)
 ```
 
-## Step 7: Creating a Cluster Template
+## Step 7: Creating Templates for provisioning Confluent Cloud Clusters
 
 Next, let's create a similar template for provisioning Confluent Cloud clusters within our environments.
 
-### 7.1 Create the Cluster Template
+### 7.1 Create the Cluster Template definition file
 
 Create a directory for the cluster template `confluent-self-service-templates/cluster-template/` and a template definition file `template.yaml` within that directory:
 
@@ -1131,7 +1129,7 @@ It allows the user to select an existing environment from the Backstage catalog.
 
 
 
-### 7.2 Create the Cluster Template Content
+### 7.2 Create the Terraform configuration file for the Cluster Template
 
 Create a content directory for the cluster template in `confluent-self-service-templates/cluster-template/content/` and a Terraform configuration file `main.tf`:
 
@@ -1270,7 +1268,7 @@ spec:
 The `dependsOn` annotation is used to build the backstage internal dependency graph.
 {{< /callout >}}
 
-### 7.3 Create GitHub Actions Workflow for Clusters
+### 7.3 Create GitHub Actions Workflow for the Cluster Template
 
 Create a GitHub Actions workflow in `confluent-self-service-templates/cluster-template/content/.github/workflows/terraform-deploy.yml`, similar to the environment workflow but with adjusted documentation output:
 
@@ -1412,7 +1410,7 @@ The additional raw and endraw escape tags are needed as backstage uses the same 
 github actions. We use them as a workaround to avoid the substitution by the backstage
 {{< /callout >}}
 
-### 7.4 Create Documentation Setup for Clusters
+### 7.4 Create Documentation Setup for the Cluster Template
 
 Create a `mkdocs.yml` file in `confluent-self-service-templates/cluster-template/content/`:
 
@@ -1433,9 +1431,9 @@ markdown_extensions:
   - pymdownx.superfences
 ```
 
-Create an initial documentation file in `confluent-self-service-templates/cluster-template/content/docs/index.md`:
+Create an initial documentation file `index.md` in the docs directory:
 
-```markdown
+```markdown {filename="confluent-self-service-templates/cluster-template/content/docs/index.md"}
 # Confluent Cloud Cluster: ${{ values.cluster_name }}
 
 This documentation provides details about the Confluent Cloud cluster and how to manage it.
