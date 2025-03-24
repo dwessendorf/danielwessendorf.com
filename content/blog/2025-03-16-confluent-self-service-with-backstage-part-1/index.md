@@ -1,8 +1,8 @@
 ---
-title: "Building a Self-Service Confluent Developer Platform with Backstage and Confluent Cloud"
+title: "Building a Self-Service Confluent Developer Platform with Backstage and Terraform"
 date: 2025-03-16
 draft: false
-summary: "In this blog post you will learn how to create a Self Service Portal for Confluent Clusters using Backstage and Terraform"
+summary: "In this blog post you will learn how to create a Self Service Portal for Confluent Cloud Clusters using Backstage and Terraform"
 tags: ["SelfService"]
 ---
 
@@ -1460,22 +1460,22 @@ yarn dev
 
 Let's walk through the user journey:
 
-1. A user logs into Backstage using their GitHub credentials
+1. A user logs into Backstage using their GitHub credentials.
 ![](/images/blog/backstage-user-journey-1.png)
 
-2. The user navigates to the "Create" page and selects the "Deploy Confluent Cloud Environment" template
+2. The user navigates to the "Create" page and selects the "Deploy Confluent Cloud Environment" template.
 ![](/images/blog/backstage-user-journey-2.png)
 
 
-3. The user fills in the form with his/her desired environment name
+3. The user fills in the form with his/her desired environment name.
 ![](/images/blog/backstage-user-journey-3.png)
 
 
-4. The system creates a new GitHub repository with Terraform code
+4. The system creates a new GitHub repository with Terraform code.
 ![](/images/blog/backstage-user-journey-4.png)
 
 
-5. The new environment is registered in the Backstage catalog
+5. The new environment is registered in the Backstage catalog.
 ![](/images/blog/backstage-user-journey-5.png)
 
 6. GitHub Actions runs the Terraform code to provision the Confluent Cloud environment. The user can see the progress in the CI/CD tab of the backstage app.
@@ -1487,7 +1487,7 @@ Let's walk through the user journey:
 8. The user can then use the "Deploy Confluent Cloud Cluster" template to create a cluster in the environment. The EntityPicker-component allows the user to select the environment we just created.
 ![](/images/blog/backstage-user-journey-8.png)
 
-9.The cluster is registered in the Backstage catalog with a dependency on the environment
+9.The cluster is registered in the Backstage catalog with a dependency on the environment.
 ![](/images/blog/backstage-user-journey-9.png)
 
 10. GitHub Actions runs the Terraform code to provision the Confluent Cloud cluster. The user can see the progress in the CI/CD tab of the backstage app.
