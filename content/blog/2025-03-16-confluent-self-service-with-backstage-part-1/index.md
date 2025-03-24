@@ -1514,7 +1514,7 @@ By combining Backstage, GitHub, Terraform, and Confluent Cloud, we've created a 
 ## Next Steps
 
 Future enhancements could include:
-- Adding templates for Kafka topics and schemas
+- Adding templates for Schema Registry, Kafka topics, Confluent Connect and Flink components
 - Implementing access control and permissions
 - Adding cost tracking and quota management
 - Integrating with monitoring systems for observability
