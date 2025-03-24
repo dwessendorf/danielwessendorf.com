@@ -1460,14 +1460,14 @@ yarn dev
 
 Let's walk through the user journey:
 
-1. A developer logs into Backstage using their GitHub credentials
+1. A user logs into Backstage using their GitHub credentials
 ![](/images/blog/backstage-user-journey-1.png)
 
-2. They navigate to the "Create" page and select the "Deploy Confluent Cloud Environment" template
+2. The user navigates to the "Create" page and selects the "Deploy Confluent Cloud Environment" template
 ![](/images/blog/backstage-user-journey-2.png)
 
 
-3. They fill in the form with their desired environment name
+3. The user fills in the form with his/her desired environment name
 ![](/images/blog/backstage-user-journey-3.png)
 
 
@@ -1484,7 +1484,7 @@ Let's walk through the user journey:
 7. The user can also see the environment details in the documentation page of the backstage app.
 ![](/images/blog/backstage-user-journey-7.png)
 
-8. The developer can then use the "Deploy Confluent Cloud Cluster" template to create a cluster in the environment. The EntityPicker allows the user to select the environment we just created.
+8. The user can then use the "Deploy Confluent Cloud Cluster" template to create a cluster in the environment. The EntityPicker-component allows the user to select the environment we just created.
 ![](/images/blog/backstage-user-journey-8.png)
 
 9.The cluster is registered in the Backstage catalog with a dependency on the environment
