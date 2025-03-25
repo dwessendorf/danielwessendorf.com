@@ -1111,21 +1111,6 @@ spec:
     - id: get-environmentvariables
       name: Get Environment Variables
       action: confluent:environmentvariables:get
-            
-    # Log debugging information about the selected environment
-    - id: parse-environment-name
-      name: Parse Environment Name
-      action: debug:log
-      input:
-        message: "Parsing environment reference: ${{ parameters.environment_name }}"
-        
-    # Extract just the name from the entity reference
-    - id: extract-environment-name
-      name: Extract Environment Name
-      action: debug:log
-      input:
-        message: |
-          ${{ (parameters.environment_name | parseEntityRef).name }}
 
     # Fetch template content for the new repository
     - id: fetch-template
@@ -1178,14 +1163,10 @@ spec:
         entityRef: ${{ steps['register'].output.entityRef }}
 ```
 
-
-
 {{< callout type="info" >}}
 The `EntityPicker` field is a backstage standard component that allows to select an entity from the catalog.
 It allows the user to select an existing environment from the Backstage catalog.
 {{< /callout >}}
-
-
 
 ### 7.2 Create the Terraform configuration file for the Cluster Template
 

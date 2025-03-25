@@ -5,7 +5,7 @@ draft: false
 summary: "In this blog post I give a sneak preview on the great e-book of my astute colleague Travis Hoffman"
 tags: ["ValueFromData", "DataProducts"]
 ---
-![](/images/blog/Data_Products_Whitepaper.png)
+[![](/images/blog/Data_Products_Whitepaper.png)](https://www.confluent.io/resources/ebook/practical-guide-to-building-data-products/)
 
 Is your organization drowning in a sea of data, unsure of where to start? Do you feel like you're stuck in “analysis paralysis”, unable to make headway? Fear not, because this recipe will provide a straightforward framework for choosing the most valuable data products, ensuring maximum value at every stage of your journey.
 
@@ -37,6 +37,6 @@ Compare the expected value against the cost to implement for your top data produ
 ## Moving Forward
 By following this recipe, you can move beyond analysis paralysis and start delivering valuable data products. This strategic framework will help you navigate the complexities of data, ensuring you get the most value out of your investment.    
 
-Want the full course meal? Dive deeper into each step and uncover more advanced techniques by reading the [full e-book](https://www.confluent.io/resources/ebook/practical-guide-to-building-data-products/) written by my astute Cnfluent colleague [Travis Hoffman](https://www.linkedin.com/in/travishoffman/) 
+Want the full course meal? Dive deeper into each step and uncover more advanced techniques by reading the [full e-book](https://www.confluent.io/resources/ebook/practical-guide-to-building-data-products/) written by my astute Confluent colleague [Travis Hoffman](https://www.linkedin.com/in/travishoffman/) 
 
 [![](/images/blog/Data_Products_Whitepaper_2.png)](https://www.confluent.io/resources/ebook/practical-guide-to-building-data-products/)
