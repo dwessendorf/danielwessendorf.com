@@ -90,6 +90,8 @@ Before we proceed to GitHub authentication, you'll need to create a personal acc
 4. Set an expiration date (I recommend at least 90 days)
 5. For repository access, select "All repositories" or specifically select the repositories you'll be using
 6. Under "Repository permissions", grant the following permissions:
+   - Administration: Read and write
+   - Secrets: Read and write
    - Contents: Read and write
    - Pull requests: Read and write
    - Workflows: Read and write
@@ -101,8 +103,8 @@ Now, set this token, your github username, display name and your (with github as
 ```bash
 export GITHUB_TOKEN="your_personal_access_token"
 export GITHUB_USERNAME="your-github-username"
-export USER_DISPLAY_NAME="Your Name"
-export USER_EMAIL="your.github-email@example.com"
+export USER_DISPLAY_NAME="your-display-name"
+export USER_EMAIL="your-email-address"
 ```
 
 
@@ -123,6 +125,8 @@ Also check the `app-config.yaml` file that backstage is using the github token e
 integrations:
   github:
     - host: github.com
+      # This is a Personal Access Token or PAT from GitHub. You can find out how to generate this token, and more information
+      # about setting up the GitHub integration here: https://backstage.io/docs/integrations/github/locations#configuration
       token: ${GITHUB_TOKEN}
 ```
 
@@ -254,8 +258,18 @@ const app = createApp({
 
 Modify your `/packages/app/src/components/catalog/EntityPage.tsx` file and add the content elements for the cicd tab. We also add an configuration flag for to enable it in the default entity page:
 
-```typescript {filename="/packages/app/src/components/catalog/EntityPage.tsx", hl_lines=[15,16,17,63,64,65]}
-// Other imports and code lines
+```typescript {filename="/packages/app/src/components/catalog/EntityPage.tsx", hl_lines=[8,9,10,11,24,25,26,27,73,74,75]}
+// Other imports
+import {
+  EntityKubernetesContent,
+  isKubernetesAvailable,
+} from '@backstage/plugin-kubernetes';
+
+// Import GitHub Actions components
+import { 
+  EntityGithubActionsContent,
+  isGithubActionsAvailable,
+} from '@backstage-community/plugin-github-actions';
 
 const techdocsContent = (
   <EntityTechdocsContent>
@@ -375,9 +389,10 @@ mkdir -p confluent-self-service-templates
 touch confluent-self-service-templates/org.yaml   
 ```
 
-Add following content to the `org.yaml` file:
+Create the `org.yaml` file with environment variables using this script:
 
-```yaml {filename="confluent-self-service-templates/org.yaml"}
+```bash
+cat > confluent-self-service-templates/org.yaml << EOL
 apiVersion: backstage.io/v1alpha1
 kind: User
 metadata:
@@ -390,6 +405,7 @@ spec:
     email: "${USER_EMAIL}"
   memberOf: [guests]
 
+
 ---
 apiVersion: backstage.io/v1alpha1
 kind: Group
@@ -398,9 +414,17 @@ metadata:
 spec:
   type: team
   children: []
+EOL
 ```
 
-Make sure your environment variables are properly set before trying to log-in into Backstage.
+This script will create the `org.yaml` file with the environment variables properly substituted. Make sure you have set the environment variables before running this script:
+- `GITHUB_USERNAME`
+- `USER_DISPLAY_NAME`
+- `USER_EMAIL`
+
+{{< callout type="info" >}}
+The script uses a heredoc (`<< EOL`) to create the file, which allows us to use environment variables directly in the content. The variables will be expanded when the script runs.
+{{< /callout >}}
 
 ### Step 4.2 : Creating first static software catalog entry for Confluent Cloud
 
@@ -502,7 +526,7 @@ rm -rf plugins/scaffolder-backend-module-getenvironmentvariables/src/actions/exa
 rm -rf plugins/scaffolder-backend-module-getenvironmentvariables/src/actions/example.ts
 ```
 
-### 5.4 Creating Custom Action Files
+### 5.4 Creating Custom Action Files and register the action
 
 We will create a new action file in the `plugins/scaffolder-backend-module-getenvironmentvariables/src/actions/` directory called `getEnvironmentVariables.ts`.
 
@@ -578,6 +602,34 @@ export const createGetEnvironmentVariablesAction = () => {
   });
 };
 ```
+Modify the `plugins/scaffolder-backend-module-getenvironmentvariables/src/module.ts` file to use the new action:
+
+Replace the existing code with the following:
+
+```typescript {filename="plugins/scaffolder-backend-module-getenvironmentvariables/src/module.ts"}
+import { createBackendModule } from "@backstage/backend-plugin-api";
+import { scaffolderActionsExtensionPoint  } from '@backstage/plugin-scaffolder-node/alpha';
+import { createGetEnvironmentVariablesAction } from "./actions/getEnvironmentVariables";
+
+/**
+ * A backend module that registers the action into the scaffolder
+ */
+export const scaffolderModule = createBackendModule({
+  moduleId: 'environment-variables-action',
+  pluginId: 'scaffolder',
+  register({ registerInit }) {
+    registerInit({
+      deps: {
+        scaffolderActions: scaffolderActionsExtensionPoint
+      },
+      async init({ scaffolderActions}) {
+        scaffolderActions.addActions(createGetEnvironmentVariablesAction());
+      }
+    });
+  },
+})
+```
+
 
 ### 5.5 Add Confluent Cloud Credentials
 
@@ -1270,7 +1322,16 @@ The `dependsOn` annotation is used to build the backstage internal dependency gr
 
 ### 7.3 Create GitHub Actions Workflow for the Cluster Template
 
-Create a GitHub Actions workflow in `confluent-self-service-templates/cluster-template/content/.github/workflows/terraform-deploy.yml`, similar to the environment workflow but with adjusted documentation output:
+
+Create a folder for the GitHub Actions workflow `confluent-self-service-templates/cluster-template/content/.github/workflows/`.
+Add a workflow configuration file named `terraform-deploy.yml` to that folder:
+
+```bash
+mkdir -p confluent-self-service-templates/cluster-template/content/.github/workflows
+touch confluent-self-service-templates/cluster-template/content/.github/workflows/terraform-deploy.yml
+```
+
+Add following content to the `terraform-deploy.yml` file:
 
 ```yaml {filename="confluent-self-service-templates/cluster-template/content/.github/workflows/terraform-deploy.yml"}
 name: "Terraform Deploy"
@@ -1412,9 +1473,16 @@ github actions. We use them as a workaround to avoid the substitution by the bac
 
 ### 7.4 Create Documentation Setup for the Cluster Template
 
-Create a `mkdocs.yml` file in `confluent-self-service-templates/cluster-template/content/`:
+Create a folder for the documentation `confluent-self-service-templates/cluster-template/content/docs/` and a `mkdocs.yml` file:
 
-```yaml {filename="confluent-self-service-templates/cluster-template/content/mkdocs.yml"}
+```bash
+mkdir -p confluent-self-service-templates/cluster-template/content/docs
+touch confluent-self-service-templates/cluster-template/content/docs/mkdocs.yml
+```
+
+Add following content to the `mkdocs.yml` file:
+
+```yaml {filename="confluent-self-service-templates/cluster-template/content/docs/mkdocs.yml"}
 site_name: 'Confluent Cloud Cluster'
 site_description: 'Documentation for Confluent Cloud Cluster'
 
@@ -1432,6 +1500,12 @@ markdown_extensions:
 ```
 
 Create an initial documentation file `index.md` in the docs directory:
+
+```bash
+touch confluent-self-service-templates/cluster-template/content/docs/index.md
+```
+
+Add following content to the `index.md` file:
 
 ```markdown {filename="confluent-self-service-templates/cluster-template/content/docs/index.md"}
 # Confluent Cloud Cluster: ${{ values.cluster_name }}
