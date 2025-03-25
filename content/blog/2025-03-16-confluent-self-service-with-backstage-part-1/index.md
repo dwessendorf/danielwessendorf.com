@@ -57,6 +57,12 @@ flowchart TD
 - A GitHub account
 - A Confluent Cloud account with API keys
 
+{{< callout type="info" >}}
+  For detailed instructions on how to install the prerequisites, please refer to the [Backstage documentation](https://backstage.io/docs/getting-started/#prerequisites). 
+  
+  If the code provided in this blog post is not working with the latest version of Backstage, you could try to use the specific versions that were used to develop this blog post (Node.js 20.18.3, Yarn 4.4.1, Backstage 1.37.0).
+{{< /callout >}}
+
 ## Step 1: Setting Up a New Backstage Project
 
 Let's start by creating a new Backstage project:
