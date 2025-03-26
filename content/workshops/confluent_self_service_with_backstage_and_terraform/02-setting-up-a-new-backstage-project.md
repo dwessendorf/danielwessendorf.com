@@ -1,19 +1,25 @@
 ---
-title: 2 - Initialize Development Envionment
+title: "Step 02: Setting up a new Backstage project"
 type: docs
+sidebar:
+  open: true
 prev: 01-introduction
-next: 03-configuring-github-authentication
+next: 03-setting-up-a-github-personal-access-toke
 ---
 ## Prerequisites
 
 - Node.js 16 or later
-- Yarn (Version 4.4.1)
+- Yarn
 - Docker (for TechDocs)
 - Git
 - A GitHub account
 - A Confluent Cloud account with API keys
 
-For detailed reqirements of needed versions see [Backstage Getting Started Guide](https://backstage.io/docs/getting-started/)
+{{< callout type="info" >}}
+  For detailed instructions on how to install the prerequisites, please refer to the [Backstage documentation](https://backstage.io/docs/getting-started/#prerequisites). 
+  
+  If the code provided in this blog post is not working with the latest version of Backstage, you could try to use the specific versions that were used to develop this blog post (Node.js 20.18.3, Yarn 4.4.1, Backstage 1.37.0).
+{{< /callout >}}
 
 ## Setting Up a New Backstage Project
 
@@ -35,11 +41,3 @@ After the installation completes, navigate to your new project:
 ```bash
 cd confluent-backstage
 ```
-
-Start the app in development mode to make sure everything is working:
-
-```bash
-yarn dev
-```
-
-This will launch your Backstage app at http://localhost:3000. You should see the default Backstage welcome page.

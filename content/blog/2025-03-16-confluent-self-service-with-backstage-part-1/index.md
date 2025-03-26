@@ -43,8 +43,8 @@ flowchart TD
 3. [Configuring GitHub authentication and GitHub Actions](#step-3-configuring-github-authentication)
 4. [Creating initial backstage configuration files](#step-4-creating-initial-backstage-configuration-files)
 5. [Building a custom plugin for Confluent Cloud integration](#step-5-building-a-custom-plugin-for-secret-handling)
-6. [Creating templates for Confluent Cloud provisioning](#step-6-creating-templates-for-provisioning-confluent-cloud-environments)
-7. [Creating a Cluster Template](#step-7-creating-a-cluster-template)
+6. [Creating templates for Confluent Cloud Environment provisioning](#step-6-creating-templates-for-provisioning-confluent-cloud-environments)
+7. [Creating templates for Confluent Cloud Cluster provisioning](#step-7-creating-templates-for-provisioning-confluent-cloud-clusters)
 8. [Update App Configuration](#step-8-update-app-configuration)
 9. [Start Your Backstage App](#step-9-start-your-backstage-app)
 
@@ -84,7 +84,7 @@ After the installation completes, navigate to your new project:
 cd confluent-backstage
 ```
 
-These variables will be used in various configuration files and templates to avoid hardcoding personal information.
+
 
 ## Step 2: Setting up a GitHub Personal Access Token and Github Environment Variables
 
@@ -123,7 +123,7 @@ echo "GITHUB_USERNAME=$GITHUB_USERNAME" >> .env
 echo "USER_DISPLAY_NAME=$USER_DISPLAY_NAME" >> .env
 echo "USER_EMAIL=$USER_EMAIL" >> .env
 ```
-
+These variables will be used in various configuration files and templates to avoid hardcoding personal information.
 
 Also check the `app-config.yaml` file that backstage is using the github token environment variable for its GitHub integration (Should be there by default):
 
