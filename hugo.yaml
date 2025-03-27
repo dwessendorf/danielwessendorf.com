@@ -90,7 +90,7 @@ params:
 
 
   footer:
-    displayCopyright: false
+    displayCopyright: true
     displayPoweredBy: false
 
   editURL:
