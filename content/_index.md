@@ -18,6 +18,12 @@ toc: false
 ## Featured Blog Posts
 
 {{< cards >}}
+  {{< card 
+    title="The Data Streaming Organization (a.k.a The cookbook)"
+    subtitle="Confluent's recent white paper, 'The Data Streaming Organization: Driving Value & Competitive Advantage From Data Streaming,' introduces a structured framework designed to help organizations navigate this transformative journey."
+    link="/blog/2025-03-10-dso-whitepaper"
+    image="/images/blog/DSO_Whitepaper_2.png" 
+  >}}
 
   {{< card 
     title="Recipe for Success: Crafting Effective Ways of Working"
@@ -53,12 +59,7 @@ toc: false
     image="/images/blog/value_from_data.jpg" 
   >}}
 
-  {{< card 
-    title="The Data Streaming Organization (a.k.a The cookbook)"
-    subtitle="Confluent's recent white paper, 'The Data Streaming Organization: Driving Value & Competitive Advantage From Data Streaming,' introduces a structured framework designed to help organizations navigate this transformative journey."
-    link="/blog/2025-03-10-dso-whitepaper"
-    image="/images/blog/DSO_Whitepaper_2.png" 
-  >}}
+
 {{< /cards >}}
 
 
