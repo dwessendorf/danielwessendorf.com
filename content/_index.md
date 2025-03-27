@@ -20,6 +20,13 @@ toc: false
 {{< cards >}}
 
   {{< card 
+    title="Recipe for Success: Crafting Effective Ways of Working"
+    subtitle="This blog posts highlights shares details on successful ways of working, one of the key pillars of the Data Streaming Organization-Framework"
+    link="/blog/2025-03-12-dso-ways-of-working"
+    image="/images/blog/ways_of_working.jpg" 
+  >}}
+
+  {{< card 
     title="Building a Confluent Self-Service Developer Platform with Backstage and Terraform"
     subtitle="In this blog post you will learn how to create a Self Service Portal for Confluent Clusters using Backstage and Terraform"
     link="/blog/2025-03-16-confluent-self-service-with-backstage-part-1"
@@ -38,12 +45,6 @@ toc: false
     image="/images/blog/kitchen.jpg" 
   >}}
 
-  {{< card 
-    title="Recipe for Success: Crafting Effective Ways of Working"
-    subtitle="This blog posts highlights shares details on successful ways of working, one of the key pillars of the Data Streaming Organization-Framework"
-    link="/blog/2025-03-12-dso-ways-of-working"
-    image="/images/blog/ways_of_working.jpg" 
-  >}}
 
   {{< card 
     title="Recipe for Success: Cooking Up Value from Data"
