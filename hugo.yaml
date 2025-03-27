@@ -12,6 +12,10 @@ outputs:
   page: [HTML]
   section: [HTML, RSS] 
 
+services:
+  googleAnalytics:
+    ID: G-MT78F7N308
+
 markup:
   highlight:
     noClasses: false
