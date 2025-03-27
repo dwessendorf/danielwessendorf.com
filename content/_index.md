@@ -18,20 +18,19 @@ toc: false
 ## Featured Blog Posts
 
 {{< cards >}}
-  {{< card 
-    title="Data Products: Travis' Fast Recipe for Success"
-    subtitle="Learn how to create effective data products that drive business value and user adoption."
-    link="/blog/2025-03-18-data-product-whitepaper"
-    image="/images/blog/Data_Products_Whitepaper_low_res.png" 
-  >}}
-  
+
   {{< card 
     title="Building a Confluent Self-Service Developer Platform with Backstage and Terraform"
     subtitle="In this blog post you will learn how to create a Self Service Portal for Confluent Clusters using Backstage and Terraform"
     link="/blog/2025-03-16-confluent-self-service-with-backstage-part-1"
     image="/images/blog/backstage.jpg" 
   >}}
-  
+  {{< card 
+    title="Data Products: Travis' Fast Recipe for Success"
+    subtitle="Learn how to create effective data products that drive business value and user adoption."
+    link="/blog/2025-03-18-data-product-whitepaper"
+    image="/images/blog/Data_Products_Whitepaper_low_res.png" 
+  >}}
   {{< card 
     title="Recipe for Success: Unified Data Streaming Platform"
     subtitle="This blog posts highlights some of the key ingredients of an unified platform, one of the key pillars of the Data Streaming Organization-Framework"
