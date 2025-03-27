@@ -84,8 +84,6 @@ After the installation completes, navigate to your new project:
 cd confluent-backstage
 ```
 
-
-
 ## Step 2: Setting up a GitHub Personal Access Token and Github Environment Variables
 
 Before we proceed to GitHub authentication, you'll need to create a personal access token that allows Backstage to interact with GitHub's API. This is necessary for repository creation and other GitHub operations.
