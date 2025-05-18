@@ -5,9 +5,9 @@ toc: false
 
 Responsible for the content:
 
-Daniel Wessendorf
-Pointstr. 2,
-D-82347 Bernried
+Daniel Wessendorf  
+Pointstr. 2  
+D-82347 Bernried  
 
 Email: d.wessendorf@gmail.com  
 Xing: [Daniel Wessendorf](https://www.xing.com/profile/Daniel_Wessendorf/)  
