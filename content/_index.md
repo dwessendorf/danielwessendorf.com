@@ -61,7 +61,7 @@ toc: false
     title="The Data Streaming Organization (a.k.a The cookbook)"
     subtitle="Confluent's recent white paper, 'The Data Streaming Organization: Driving Value & Competitive Advantage From Data Streaming,' introduces a structured framework designed to help organizations navigate this transformative journey."
     link="/blog/2025-03-10-dso-whitepaper"
-    image="/images/blog/DSO_Whitepaper_2_low_res.png" 
+    image="/images/blog/DSO_Whitepaper_low_res.png" 
   >}}
 
 {{< /cards >}}
