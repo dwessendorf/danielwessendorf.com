@@ -3,10 +3,8 @@ title: "Creating a serverless Apache Kafka publisher using AWS Lambda"
 date: 2022-06-15
 draft: false
 summary: "Learn how to build a serverless Apache Kafka producer using AWS Lambda and API Gateway to push real-time streaming data to Amazon MSK, with Java implementation examples and CDK deployment."
-tags: ["AWS Seerverless MSK"]
+tags: ["AWS Serverless MSK"]
 ---
-
-
 
 
 *This post is written by Philipp Klose, Global Solution Architect, and Daniel Wessendorf, Global Solution Architect for the AWS Serverless Compute Blog.*

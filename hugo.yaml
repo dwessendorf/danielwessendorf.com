@@ -30,10 +30,6 @@ markup:
           inline: [['\(', '\)']]
         enable: true
 
-  # enable hextra syntax highlight
-  highlight:
-    noClasses: false
-
 menu:
   main:
     - name: Workshops
