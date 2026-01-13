@@ -26,7 +26,7 @@ toc: false
 </div>
 By day, I'm a Senior Solution Engineer at Snowflake, working with some of the biggest names in the insurance market. Basically, I help companies turn exciting ideas in data and artificial intelligence into reality. 
 
-With 18+ years navigating the tech landscape — from financial services and consulting to adventures in cloud computing and artifical intelligence at Confluent, AWS, Allianz, and Accenture - I've learned a lot and love sharing that knowledge.
+With 18+ years navigating the tech landscape — from financial services and consulting to adventures in cloud computing and artifical intelligence at Snowflake, Confluent, AWS, Allianz, and Accenture - I've learned a lot and love sharing that knowledge.
 
 My job involves translating complex tech topics into clear, practical strategies. Think of me as a guide through the fascinating worlds of data and AI, making sure we have fun along the way.
 
