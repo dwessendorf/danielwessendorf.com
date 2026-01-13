@@ -6,10 +6,11 @@ summary: "Learn how to build a serverless Apache Kafka producer using AWS Lambda
 tags: ["AWS Seerverless MSK"]
 ---
 
-original_url: "https://aws.amazon.com/blogs/compute/creating-a-serverless-apache-kafka-publisher-using-aws-lambda/"
----
 
-*This post is written by Philipp Klose, Global Solution Architect, and Daniel Wessendorf, Global Solution Architect.*
+
+
+*This post is written by Philipp Klose, Global Solution Architect, and Daniel Wessendorf, Global Solution Architect for the AWS Serverless Compute Blog.*
+Priginal URL: "https://aws.amazon.com/blogs/compute/creating-a-serverless-apache-kafka-publisher-using-aws-lambda/"
 
 Streaming data and event-driven architectures are becoming more popular for many modern systems. The range of use cases includes web tracking and other logs, industrial IoT, in-game player activity, and the ingestion of data for modern analytics architecture.
 
@@ -274,6 +275,3 @@ The general pattern is suitable for many use cases that need an integration betw
 
 
 
-```
-
-```
