@@ -1,9 +1,9 @@
 ---
-title: "The Data Streaming Organization (a.k.a The cookbook)"
+title: "Creating a serverless Apache Kafka publisher using AWS Lambda"
 date: 2022-06-15
 draft: false
-summary: "Confluent's recent white paper, 'The Data Streaming Organization: Driving Value & Competitive Advantage From Data Streaming,' introduces a structured framework designed to help organizations navigate this transformative journey."
-tags: ["DataStreamingOrganization"]
+summary: "Learn how to build a serverless Apache Kafka producer using AWS Lambda and API Gateway to push real-time streaming data to Amazon MSK, with Java implementation examples and CDK deployment."
+tags: ["AWS Seerverless MSK"]
 ---
 
 original_url: "https://aws.amazon.com/blogs/compute/creating-a-serverless-apache-kafka-publisher-using-aws-lambda/"
