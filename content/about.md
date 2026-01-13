@@ -11,7 +11,7 @@ toc: false
   </div>
   
   <h1 style="font-size: 2.5rem; margin-top: 1rem;">Daniel Wessendorf</h1>
-  <p style="font-size: 1.25rem; margin-top: 0.5rem;">Senior Executive Advisor at Confluent</p>
+  <p style="font-size: 1.25rem; margin-top: 0.5rem;">Senior Solution Engineer at Snowflake</p>
   <p style="font-size: 1.25rem; margin-top: 0.5rem;">
     <a href="https://linkedin.com/in/daniel-wessendorf" style="display: inline-block; margin: 0 10px;">
       <img src="/images/about/hugeicons--linkedin-02.svg" alt="Linkedin" class="invert-in-dark" style="width: 24px; height: 24px;">
