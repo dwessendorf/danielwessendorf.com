@@ -41,6 +41,20 @@ toc: false
     image="/images/blog/DSO_Whitepaper_low_res.png" 
   >}}
 
+  {{< card 
+    title="Creating a serverless Apache Kafka publisher using AWS Lambda"
+    subtitle="Learn how to build a serverless Apache Kafka producer using AWS Lambda and API Gateway to push real-time streaming data to Amazon MSK, with Java implementation examples and CDK deployment."
+    link="/blog/2022-06-15-aws-blog-serverless-kafka-producer"
+    image="/images/blog/aws_kafka_blog_architecture.png" 
+  >}}
+
+  {{< card 
+    title="Build streaming data pipelines with Amazon MSK Serverless and IAM authentication"
+    subtitle="Learn how to build a serverless Apache Kafka producer using AWS Lambda and API Gateway to push real-time streaming data to Amazon MSK, with Java implementation examples and CDK deployment."
+    link="/blog/2022-06-15-aws-blog-streaming-data-pipelines"
+    image="/images/blog/aws_kafka_blog2_architecture.png" 
+  >}}
+
 {{< /cards >}}
 
 
