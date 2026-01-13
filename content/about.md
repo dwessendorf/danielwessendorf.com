@@ -24,11 +24,11 @@ toc: false
     </a>
   </p>
 </div>
-By day, I'm a Senior Executive Advisor at Confluent, working with some of the biggest names in the German-speaking market. Basically, I help companies turn exciting ideas in data streaming and artificial intelligence into reality. 
+By day, I'm a Senior Solution Engineer at Snowflake, working with some of the biggest names in the insurance market. Basically, I help companies turn exciting ideas in data and artificial intelligence into reality. 
 
-With 18+ years navigating the tech landscape — from financial services and consulting to adventures in cloud computing and artifical intelligence at AWS, Allianz, and Accenture - I've learned a lot and love sharing that knowledge.
+With 18+ years navigating the tech landscape — from financial services and consulting to adventures in cloud computing and artifical intelligence at Confluent, AWS, Allianz, and Accenture - I've learned a lot and love sharing that knowledge.
 
-My job involves translating complex tech topics into clear, practical strategies. Think of me as a guide through the fascinating worlds of data streaming and AI, making sure we have fun along the way.
+My job involves translating complex tech topics into clear, practical strategies. Think of me as a guide through the fascinating worlds of data and AI, making sure we have fun along the way.
 
 When I'm not immersed in tech, you'll usually find me hiking trails with my dog, skiing down a snowy slope, or simply enjoying nature with my lovely wife and our two energetic daughters. Time outdoors is my best source of inspiration — and sanity!
 
