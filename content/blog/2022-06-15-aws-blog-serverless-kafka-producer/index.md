@@ -8,7 +8,8 @@ tags: ["AWS Serverless MSK"]
 
 
 *This post is written by Philipp Klose, Global Solution Architect, and Daniel Wessendorf, Global Solution Architect for the AWS Serverless Compute Blog.*
-Priginal URL: "https://aws.amazon.com/blogs/compute/creating-a-serverless-apache-kafka-publisher-using-aws-lambda/"
+
+*Original URL:* https://aws.amazon.com/blogs/compute/creating-a-serverless-apache-kafka-publisher-using-aws-lambda/
 
 Streaming data and event-driven architectures are becoming more popular for many modern systems. The range of use cases includes web tracking and other logs, industrial IoT, in-game player activity, and the ingestion of data for modern analytics architecture.
 
@@ -146,7 +147,7 @@ To trace a request end to end:
 4.  Choose View traces.
 ![](/images/blog/aws_kafka_blog_traces.png)
 5.  Select a single Lambda method invocation and investigate further at the Java method level.
-![](/images/blog/aws_kafka_blog_java_invstigation.png)
+![](/images/blog/aws_kafka_blog_java_investigation.png)
 ## Cleaning up
 
 In the subdirectory `serverless-kafka-iac`, delete the test infrastructure:
