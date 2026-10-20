@@ -1,5 +1,5 @@
 # Hugo configuration file
-title: DANIEL WESSENDORF
+title: Daniel Wessendorf
 baseURL: "https://danielwessendorf.com/"
 
 # import hextra as module
@@ -44,8 +44,8 @@ menu:
     - name: About me
       pageRef: /about
       weight: 4
-    - name: Contact ↗
-      url: "https://linkedin.com/in/daniel-wessendorf"
+    - name: SAIN Labs
+      url: "/#now"
       weight: 5
     - name: Search
       weight: 6
@@ -63,6 +63,17 @@ menu:
         icon: linkedin
 
 params:
+  description: "Data & AI architect and co-founder of SAIN Labs. Recipes, write-ups and talks on data streaming, cloud and AI."
+
+  contact:
+    email: d.wessendorf@gmail.com
+    linkedin: "https://linkedin.com/in/daniel-wessendorf"
+    github: "https://github.com/dwessendorf"
+
+  theme:
+    default: system
+    displayToggle: true
+
   navbar:
     displayTitle: true
     displayLogo: true

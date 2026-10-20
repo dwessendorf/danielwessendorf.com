@@ -1,0 +1,47 @@
+<section class="dw-section dw-wrap" aria-labelledby="dw-writing-title">
+  <div class="dw-section__head">
+    <p class="dw-eyebrow">Recipes</p>
+    <h2 id="dw-writing-title" class="dw-h2">Write-ups, workshops and talks.</h2>
+    <p class="dw-section__intro">IT is a lot like cooking: with a good recipe and some practice, anyone can make something great. Try these at home, or at work.</p>
+  </div>
+
+  <div class="dw-writing">
+    <div class="dw-posts">
+      {{- range .Params.featured }}
+        {{- $image := .image }}
+        {{- with site.GetPage .path }}
+          <a class="dw-post" href="{{ .RelPermalink }}">
+            <img class="dw-post__img" src="{{ $image | relURL }}" alt="" loading="lazy" width="640" height="360" />
+            <span class="dw-post__meta">{{ .Date.Format "Jan 2006" }}{{ with .Params.tags }} · {{ index . 0 }}{{ end }}</span>
+            <span class="dw-post__title">{{ .Title }}</span>
+          </a>
+        {{- end }}
+      {{- end }}
+      <a class="dw-more" href="{{ (site.GetPage "/blog").RelPermalink }}">All posts →</a>
+    </div>
+
+    <aside class="dw-side">
+      <div class="dw-talks">
+        <h3 class="dw-h3">On stage</h3>
+        <ul>
+          {{- range .Params.talks }}
+            <li>
+              <time datetime="{{ .date }}">{{ (time .date).Format "02 Jan 2006" }}</time>
+              <span class="dw-talk__title">{{ .title }}</span>
+              <span class="dw-talk__event">{{ with .kind }}{{ . }} · {{ end }}{{ .event }}</span>
+            </li>
+          {{- end }}
+        </ul>
+        <a class="dw-more" href="{{ (site.GetPage "/talks").RelPermalink }}">Slides and photos →</a>
+      </div>
+
+      {{- with site.GetPage "/workshops/confluent_self_service_with_backstage_and_terraform" }}
+        <a class="dw-workshop" href="{{ .RelPermalink }}">
+          <span class="dw-eyebrow">Hands-on workshop</span>
+          <span class="dw-workshop__title">{{ .Title }}</span>
+          <span class="dw-workshop__meta">{{ len .Pages }} steps · Backstage, Terraform, Confluent Cloud</span>
+        </a>
+      {{- end }}
+    </aside>
+  </div>
+</section>

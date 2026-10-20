@@ -1,0 +1,22 @@
+{{- $hero := .Params.hero -}}
+{{- $contact := site.Params.contact -}}
+<section class="dw-hero dw-wrap" aria-labelledby="dw-hero-title">
+  <div class="dw-hero__text">
+    <p class="dw-eyebrow">{{ $hero.eyebrow }}</p>
+    <h1 id="dw-hero-title" class="dw-hero__title"><span class="dw-first">Daniel</span><br /><span class="dw-last">Wessendorf</span></h1>
+    <p class="dw-hero__lede">{{ $hero.lede }}</p>
+    <div class="dw-actions">
+      <a class="dw-btn dw-btn--primary" href="{{ (site.GetPage "/blog").RelPermalink }}">Read the blog</a>
+      <a class="dw-btn" href="#now">What I'm building</a>
+      <a class="dw-btn dw-btn--ghost" href="{{ $contact.linkedin }}" target="_blank" rel="noopener">Get in touch ↗</a>
+    </div>
+  </div>
+  <figure class="dw-hero__figure">
+    <canvas class="dw-contours" data-contours aria-hidden="true"></canvas>
+    <img class="dw-hero__portrait" src="{{ $hero.portrait | relURL }}" alt="Portrait of Daniel Wessendorf" width="320" height="320" />
+    <figcaption class="dw-hero__caption">
+      <span>{{ $hero.location }}</span>
+      <span>{{ $hero.coordinates }}</span>
+    </figcaption>
+  </figure>
+</section>

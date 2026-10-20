@@ -1,2 +1,13 @@
+<link rel="preload" href="{{ "fonts/bricolage-grotesque-latin-opsz.woff2" | relURL }}" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="{{ "fonts/instrument-sans-latin-wght.woff2" | relURL }}" as="font" type="font/woff2" crossorigin />
 
-<script id="usercentrics-cmp" src="https://app.usercentrics.eu/browser-ui/latest/loader.js" data-settings-id="2ri3vpyOZB3xSr" async></script>
+{{- if .IsHome }}
+  {{- with resources.Get "js/contours.js" }}
+    {{- $js := . | minify | fingerprint }}
+    <script defer src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}"></script>
+  {{- end }}
+{{- end }}
+
+{{- if hugo.IsProduction }}
+  <script id="usercentrics-cmp" src="https://app.usercentrics.eu/browser-ui/latest/loader.js" data-settings-id="2ri3vpyOZB3xSr" async></script>
+{{- end }}

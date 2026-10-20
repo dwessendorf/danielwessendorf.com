@@ -1,0 +1,26 @@
+{{- $sain := .Params.sain -}}
+{{- $contact := site.Params.contact -}}
+<section id="now" class="dw-section dw-wrap" aria-labelledby="dw-sain-title">
+  <div class="dw-sain">
+    <div class="dw-sain__head">
+      <p class="dw-eyebrow dw-eyebrow--live"><span class="dw-pulse" aria-hidden="true"></span>{{ $sain.eyebrow }}</p>
+      <p class="dw-sain__brand">SAIN Labs</p>
+      <h2 id="dw-sain-title" class="dw-sain__title">{{ $sain.title }}</h2>
+      {{- range $sain.intro }}
+        <p class="dw-sain__intro">{{ . }}</p>
+      {{- end }}
+    </div>
+    <ul class="dw-sain__hints">
+      {{- range $sain.hints }}
+        <li>
+          <h3>{{ .title }}</h3>
+          <p>{{ .text }}</p>
+        </li>
+      {{- end }}
+    </ul>
+    <div class="dw-sain__foot">
+      <a class="dw-btn dw-btn--light" href="mailto:{{ $contact.email }}?subject=SAIN%20Labs%20early%20access">{{ $sain.cta }}</a>
+      <p class="dw-sain__footnote">{{ $sain.footnote }}</p>
+    </div>
+  </div>
+</section>

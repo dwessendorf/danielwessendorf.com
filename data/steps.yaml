@@ -1,0 +1,55 @@
+# Career steps, newest first. Rendered on the homepage (compact) and on /about (detailed).
+- period: "2026 – today"
+  org: SAIN Labs
+  role: Co-Founder
+  place: Bernried am Starnberger See
+  current: true
+  note: "Building privacy-first, personal AI together with Tanja Wessendorf. Currently in stealth."
+
+- period: "2025 – 2026"
+  org: Snowflake
+  role: Senior Solutions Engineer
+  place: Munich
+  note: "Data and AI platform work with some of the largest insurers in the German market."
+
+- period: "2024 – 2025"
+  org: Confluent
+  role: Senior Executive Advisor
+  place: Munich
+  note: "Advised executives on becoming a data streaming organization. Speaker on the Data in Motion Tour 2024."
+
+- period: "2019 – 2024"
+  org: Amazon Web Services
+  role: Senior Solutions Architect
+  place: Munich
+  note: "Cloud, data and AI architectures for global financial services customers. Author on the AWS Compute and Big Data blogs."
+
+- period: "2019"
+  org: Allianz SE
+  role: Enterprise Architect
+  place: Munich
+  note: "Enterprise architecture at group level."
+
+- period: "2014 – 2019"
+  org: Allianz Technology
+  role: Principal IT Architect
+  place: Munich
+  note: "Chief architect of an internal startup that ran up to ten predictive-analytics solutions on allianz.de from 2015."
+
+- period: "2012 – 2014"
+  org: metafinanz
+  role: Project Manager & Principal Consultant
+  place: Munich
+  note: "Led IT projects as project manager and principal consultant."
+
+- period: "2006 – 2012"
+  org: Accenture
+  role: IT Strategy Consultant
+  place: Kronberg im Taunus
+  note: "IT strategy for financial services clients."
+
+- period: "2000 – 2006"
+  org: Paderborn University
+  role: Diplom-Wirtschaftsinformatiker
+  place: Paderborn
+  note: "Degree in business information systems (M.Sc. equivalent)."
