@@ -1,9 +1,30 @@
 # Hetzner migration
 
-Prepared on 2026-10-21. **Root-free setup is complete; origin deployment and DNS
-cutover are pending.** The founder explicitly approved this revised path/account.
-GitHub Pages and its workflow remain active until the new origin and public HTTPS
-have passed verification. The existing Netlify configuration is retained.
+**Live on Hetzner since 2026-10-21.** The founder explicitly approved the root-free
+path/account. The origin and public HTTPS checks passed before the GitHub Pages
+workflow was disabled. Its prior deployment/custom domain remain for rollback.
+The existing Netlify configuration is retained.
+
+## Verified cutover
+
+- Website PR #1 merged at `a25ee35220f6ee03b259a94387f1f265483d6dba`.
+  [Production Actions run 39571289479](https://github.com/dwessendorf/danielwessendorf.com/actions/runs/39571289479)
+  built, rsynced and verified the exact revision directly at the origin.
+- Infrastructure PR #25 merged at `2c1a5fb86a41d98340da08abecec6e9006d605ae`.
+  DNS preview run `39571546724` showed only the four intended apex A-record
+  corrections; apply run `39571705312` succeeded and verified zero drift.
+- Valid origin certificates for apex/www and Cloudflare **Full (strict)** were
+  verified. The temporary origin HTTP block is removed. HTTP redirects to HTTPS;
+  www preserves paths and queries while redirecting to the apex.
+- Direct and public checks passed for the exact homepage hash, revision,
+  sections, CSS/JS/fonts, CV PDF and a true 404. Cloudflare's email rewrite
+  initially changed HTML bytes; `Cache-Control: no-transform` now preserves the
+  generated response. Explicit asset cache policies still apply.
+- `HETZNER_VERIFY_HTTPS=true`; HTTPS checks also run by default if the variable
+  is absent. Only explicit `false` permits temporary bootstrap HTTP checks.
+- Pages workflow state is `disabled_manually`, after public HTTPS verification.
+  All container IDs stayed unchanged. LKZ, IGS Oyten and Feedback origin probes
+  returned 200; their configurations were not modified.
 
 Preparation checks passed: exact-version Hugo build locally and in GitHub
 Actions, actionlint, shell/Python syntax, and validation in the existing Caddy
@@ -64,8 +85,8 @@ the site root. Test an rsync upload and deletion inside the new site only.
 3. Validate with `docker exec caddy caddy validate --config /etc/caddy/Caddyfile`.
    Reload with `docker exec caddy caddy reload --config /etc/caddy/Caddyfile`.
    No `compose up`, container restart or platform checkout is necessary.
-4. Merge the website PR and wait for the GitHub Actions rsync deployment. With
-   `HETZNER_VERIFY_HTTPS` unset, its check goes directly to the origin over HTTP.
+4. For initial bootstrap only, set `HETZNER_VERIFY_HTTPS=false` before the first
+   rsync deployment. Its check then goes directly to the origin over HTTP.
    The verifier requires the exact revision, homepage hash, section pages,
    referenced CSS/JS/fonts, CV PDF and a real 404. A 200 from Pages cannot pass.
 5. In the infrastructure repository change only the apex A records in
@@ -129,4 +150,5 @@ Do not remove the GitHub Pages custom-domain configuration during migration.
 
 References: [Caddy automatic HTTPS](https://caddyserver.com/docs/automatic-https),
 [Caddy error handling](https://caddyserver.com/docs/caddyfile/directives/handle_errors),
-[restricted rsync](https://download.samba.org/pub/rsync/rrsync.1).
+[restricted rsync](https://download.samba.org/pub/rsync/rrsync.1),
+[Cloudflare no-transform](https://developers.cloudflare.com/waf/tools/scrape-shield/email-address-obfuscation/).

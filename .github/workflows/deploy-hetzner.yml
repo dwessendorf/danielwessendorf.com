@@ -90,9 +90,9 @@ jobs:
         run: |
           set -euo pipefail
           args=(--revision "$GITHUB_SHA" --origin "$HOST")
-          if [[ "$VERIFY_HTTPS" != true ]]; then args+=(--http); fi
+          if [[ "$VERIFY_HTTPS" == false ]]; then args+=(--http); fi
           python3 deploy/hetzner/verify.py "${args[@]}"
-          if [[ "$VERIFY_HTTPS" == true ]]; then
+          if [[ "$VERIFY_HTTPS" != false ]]; then
             python3 deploy/hetzner/verify.py --revision "$GITHUB_SHA"
           fi
       - name: Remove runner credentials
