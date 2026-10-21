@@ -101,16 +101,25 @@ Do not remove the GitHub Pages custom-domain configuration during migration.
   about 5.7 on four vCPUs. No cleanup or workload changes were performed.
 - `host-monitor.sh` runs every five minutes and logs locally, but the decrypted
   infra environment has **no `HEALTHCHECK_URL_HOST`**. It therefore sends no host
-  heartbeat. The check named “futurelearninglab on hetzner” must be matched in
-  healthchecks.io before creating its dedicated Bitwarden receiver/delivery.
+  heartbeat. This is separate from the reported existing backup check.
   The currently deployed script still reads the older infra environment; follow
   the current infrastructure repository's per-consumer delivery procedure when
   activating this receiver rather than editing a server `.env` directly.
+- The Healthchecks check named `futurelearninglab`, description
+  “futurelearninglab on hetzner health check”, is the **daily backup monitor**.
+  Its event log records the up-to-down transition on **2026-08-03 at 04:07
+  Europe/Berlin**: NAS restic check reported problems. From August 4 onward it
+  reports the NAS repository unreachable / init failed. It still receives daily
+  failure pings; on October 21 these also report primary Object Storage failure.
+  Adding a host heartbeat cannot resolve this existing backup alarm.
 - The latest platform backup log reports unreadable Caddy/Gitea paths, failed
   Object Storage writes and an unreachable/uninitialised NAS backup repository.
   This requires separate repair; the site migration does not change backups.
 - Root SSH is refused and `deploy` has no sudo permission. The setup is queued
   for the founder rather than bypassing those controls through Docker access.
+  The founder's first run returned exit code 1; a read-only inspection found no
+  new account or site paths. No automatic retry was attempted. A decision on the
+  existing static path versus manual root-console setup is pending in the Inbox.
 
 References: [Caddy automatic HTTPS](https://caddyserver.com/docs/automatic-https),
 [Caddy error handling](https://caddyserver.com/docs/caddyfile/directives/handle_errors),
