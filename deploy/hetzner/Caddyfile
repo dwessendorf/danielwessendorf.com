@@ -3,8 +3,7 @@
 # Validate and reload the existing container; do not restart it.
 
 (dw-static) {
-	# Host alias: /srv/www/danielwessendorf.com -> /srv/static-sites/danielwessendorf.com.
-	# This path is already mounted read-only in the existing Caddy container.
+	# Root-free target approved on 2026-10-21; already mounted read-only in Caddy.
 	root * /srv/static-sites/danielwessendorf.com/public
 	encode zstd gzip
 	file_server

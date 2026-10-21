@@ -81,7 +81,7 @@ jobs:
           set -euo pipefail
           rsync -rpz --checksum --delete-after --delay-updates --chmod=D755,F644 \
             -e 'ssh -i ~/.ssh/dw_deploy -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=~/.ssh/dw_known_hosts -o ConnectTimeout=15' \
-            public/ "deploy-dw@${HOST}:/"
+            public/ "deploy@${HOST}:/"
       - name: Verify the deployed revision at the origin
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         env:

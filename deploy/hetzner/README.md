@@ -1,6 +1,7 @@
 # Hetzner migration
 
-Prepared on 2026-10-21. **Cutover is pending the one-time root setup.**
+Prepared on 2026-10-21. **Root-free setup is complete; origin deployment and DNS
+cutover are pending.** The founder explicitly approved this revised path/account.
 GitHub Pages and its workflow remain active until the new origin and public HTTPS
 have passed verification. The existing Netlify configuration is retained.
 
@@ -17,25 +18,30 @@ Pull requests build without deployment credentials. Pushes to `main` and manual
 runs on `main` build with Hugo extended **0.145.0**, verify the official binary's
 SHA-256, then rsync the static output over SSH. There is no build on the server.
 
-The dedicated `deploy-dw` account accepts a single forced `rrsync -wo -munge`
-command, restricted to `/srv/www/danielwessendorf.com/public`. It has no Docker or
-sudo membership, interactive shell access through this key, forwarding or PTY.
-Its root-owned SSH configuration lives outside the published directory.
+The dedicated website key in the existing `deploy` account accepts a single
+forced `rrsync -wo -munge` command, restricted to
+`/srv/static-sites/danielwessendorf.com/public`. This key cannot open a shell,
+download files, forward connections, request a PTY or reach other paths. The
+operator's existing keys are preserved, with a private backup of authorized_keys.
+The SSH configuration lives outside the published directory. The existing
+account keeps its operator permissions; only the dedicated key is constrained.
 `--delay-updates --delete-after` defers file replacement and deletion until the
 transfer's final stage; this is not an atomic swap of the whole site.
 
-On this host Caddy already has a read-only mount of `/srv/static-sites`.
-`/srv/www/danielwessendorf.com` therefore aliases
-`/srv/static-sites/danielwessendorf.com` on the host. Both paths address the same
-files. Caddy uses its existing mounted path; no container, process, mount change
-or service restart is needed. Only the new site's imported block is added.
+On this host Caddy already has a read-only mount of `/srv/static-sites`. The
+founder approved using this path directly instead of the original `/srv/www`
+target after root access failed. No alias or new OS user is created. No container,
+process, mount change or service restart is needed. Only the new site's imported
+block is added.
 
 ## One-time server setup
 
 Generate a dedicated Ed25519 key locally and transfer **only the public key** to
-the server. Run [setup-server.sh](setup-server.sh) as root on
-`dwessendorf-cx33-1`, passing the public key's filename. Existing conflicting
-paths or keys cause a refusal. Neither the proxy nor any existing app is changed.
+the server. Run [setup-server.sh](setup-server.sh) as `deploy` on
+`dwessendorf-cx33-1`, passing the public key's filename. It preserves existing
+authorized_keys bytes and appends only this site's forced command. Conflicting
+keys, symlinks or wrong ownership cause a refusal. Neither the proxy nor any
+existing app is changed. The approved setup and restricted-key tests passed.
 
 Set these repository Actions secrets without printing their contents:
 
@@ -50,7 +56,7 @@ the site root. Test an rsync upload and deletion inside the new site only.
 
 ## Cutover sequence
 
-1. Finish root setup. Keep `.github/workflows/pages.yaml` enabled.
+1. Finish restricted-key setup. Keep `.github/workflows/pages.yaml` enabled.
 2. Install `Caddyfile` followed by `Caddyfile.preflight` as the single new file
    `/srv/platform/sites/danielwessendorf-com/site.caddy`. The existing top-level
    Caddyfile already imports it. Save the current adapted configuration and
@@ -115,11 +121,11 @@ Do not remove the GitHub Pages custom-domain configuration during migration.
 - The latest platform backup log reports unreadable Caddy/Gitea paths, failed
   Object Storage writes and an unreachable/uninitialised NAS backup repository.
   This requires separate repair; the site migration does not change backups.
-- Root SSH is refused and `deploy` has no sudo permission. The setup is queued
-  for the founder rather than bypassing those controls through Docker access.
-  The founder's first run returned exit code 1; a read-only inspection found no
-  new account or site paths. No automatic retry was attempted. A decision on the
-  existing static path versus manual root-console setup is pending in the Inbox.
+- Root SSH is refused and `deploy` has no sudo permission. The founder's first
+  root run returned exit code 1 with no new account or site paths. No automatic
+  retry was attempted. The founder subsequently approved the existing static
+  path and restricted key in `deploy`. Setup succeeded, and actual upload/delete
+  tests passed. Shell, downloads and a dry-run path escape were refused by rrsync.
 
 References: [Caddy automatic HTTPS](https://caddyserver.com/docs/automatic-https),
 [Caddy error handling](https://caddyserver.com/docs/caddyfile/directives/handle_errors),
