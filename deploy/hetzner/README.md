@@ -4,6 +4,12 @@ Prepared on 2026-10-21. **Cutover is pending the one-time root setup.**
 GitHub Pages and its workflow remain active until the new origin and public HTTPS
 have passed verification. The existing Netlify configuration is retained.
 
+Preparation checks passed: exact-version Hugo build locally and in GitHub
+Actions, actionlint, shell/Python syntax, and validation in the existing Caddy
+container. Comparing the proposed config against the active config preserved
+all 17 existing host routes (normalizing generated group IDs and config-file
+hide-list ordering). The candidate configuration has not been loaded.
+
 ## Deployment
 
 The authoritative workflow is [../../.github/workflows/deploy-hetzner.yml](../../.github/workflows/deploy-hetzner.yml).
@@ -96,7 +102,10 @@ Do not remove the GitHub Pages custom-domain configuration during migration.
 - `host-monitor.sh` runs every five minutes and logs locally, but the decrypted
   infra environment has **no `HEALTHCHECK_URL_HOST`**. It therefore sends no host
   heartbeat. The check named “futurelearninglab on hetzner” must be matched in
-  healthchecks.io before adding its URL through the existing SOPS process.
+  healthchecks.io before creating its dedicated Bitwarden receiver/delivery.
+  The currently deployed script still reads the older infra environment; follow
+  the current infrastructure repository's per-consumer delivery procedure when
+  activating this receiver rather than editing a server `.env` directly.
 - The latest platform backup log reports unreadable Caddy/Gitea paths, failed
   Object Storage writes and an unreachable/uninitialised NAS backup repository.
   This requires separate repair; the site migration does not change backups.
