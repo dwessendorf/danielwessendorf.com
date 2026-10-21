@@ -1,0 +1,5 @@
+# Append temporarily to site.caddy until DNS and origin TLS are verified.
+# Enables direct HTTP verification while the public domain still uses Pages.
+http://danielwessendorf.com {
+	import dw-static
+}
