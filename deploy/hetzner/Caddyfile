@@ -14,6 +14,10 @@
 		Referrer-Policy "strict-origin-when-cross-origin"
 		-Server
 	}
+	# Preserve the generated HTML byte-for-byte through Cloudflare. Otherwise its
+	# email rewrite changes the deployed content hash. Asset rules below override
+	# this fallback with their own cache policy.
+	header ?Cache-Control "no-cache, no-transform"
 
 	@immutable path_regexp fingerprint \.[a-f0-9]{16,}\.(css|js)$
 	header @immutable Cache-Control "public, max-age=31536000, immutable"
