@@ -5,3 +5,7 @@ resources/
 
 # Editor
 .vscode/
+
+# Local deployment credentials
+.private/
+__pycache__/

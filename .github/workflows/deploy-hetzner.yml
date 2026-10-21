@@ -1,0 +1,100 @@
+name: Build and deploy to Hetzner
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hetzner-${{ github.event_name == 'pull_request' && github.ref || 'production' }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+        with:
+          go-version: '1.22'
+      - name: Install Hugo extended 0.145.0
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/hugo.deb" \
+            https://github.com/gohugoio/hugo/releases/download/v0.145.0/hugo_extended_0.145.0_linux-amd64.deb
+          echo "f734be717676acdc4f59d7c348e5e45188778f8c4a14022e102b4c3216971658  $RUNNER_TEMP/hugo.deb" | sha256sum -c -
+          sudo dpkg -i "$RUNNER_TEMP/hugo.deb"
+      - name: Build static site
+        env:
+          HUGO_ENVIRONMENT: production
+          HUGO_ENV: production
+        run: |
+          set -euo pipefail
+          hugo --gc --minify --baseURL https://danielwessendorf.com/
+          test -s public/index.html
+          test -s public/404.html
+          mkdir -p public/.well-known
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          root = Path('public')
+          marker = {'revision': os.environ['GITHUB_SHA'],
+                    'index_sha256': hashlib.sha256((root / 'index.html').read_bytes()).hexdigest()}
+          (root / '.well-known/deployment.json').write_text(json.dumps(marker) + '\n')
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: hugo-${{ github.sha }}
+          path: public/
+          include-hidden-files: true
+          retention-days: 14
+      - name: Configure restricted deploy identity
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        env:
+          SSH_KEY: ${{ secrets.HETZNER_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.HETZNER_KNOWN_HOSTS }}
+          HOST: ${{ secrets.HETZNER_HOST }}
+        run: |
+          set -euo pipefail
+          test -n "$SSH_KEY" && test -n "$KNOWN_HOSTS" && test -n "$HOST"
+          install -m 700 -d ~/.ssh
+          umask 077
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/dw_deploy
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/dw_known_hosts
+      - name: Upload to the site's restricted web root
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        env:
+          HOST: ${{ secrets.HETZNER_HOST }}
+        run: |
+          set -euo pipefail
+          rsync -rpz --checksum --delete-after --delay-updates --chmod=D755,F644 \
+            -e 'ssh -i ~/.ssh/dw_deploy -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=~/.ssh/dw_known_hosts -o ConnectTimeout=15' \
+            public/ "deploy@${HOST}:/"
+      - name: Verify the deployed revision at the origin
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        env:
+          HOST: ${{ secrets.HETZNER_HOST }}
+          VERIFY_HTTPS: ${{ vars.HETZNER_VERIFY_HTTPS }}
+        run: |
+          set -euo pipefail
+          args=(--revision "$GITHUB_SHA" --origin "$HOST")
+          if [[ "$VERIFY_HTTPS" != true ]]; then args+=(--http); fi
+          python3 deploy/hetzner/verify.py "${args[@]}"
+          if [[ "$VERIFY_HTTPS" == true ]]; then
+            python3 deploy/hetzner/verify.py --revision "$GITHUB_SHA"
+          fi
+      - name: Remove runner credentials
+        if: always()
+        run: rm -f ~/.ssh/dw_deploy ~/.ssh/dw_known_hosts

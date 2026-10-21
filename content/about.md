@@ -1,37 +1,33 @@
 ---
-title: 
+title: About me
+description: "Daniel Wessendorf: data & AI architect from Lake Starnberg and co-founder of SAIN Labs."
 toc: false
 ---
 
-
-<div style="text-align: center;">
-  <div class="image-container">
-    <img src="/images/about/Daniel-quadrat.png" alt="Daniel" class="light-image" style="width: 250px; height: 250px; object-fit: cover; border-radius: 50%;">
-    <img src="/images/about/Daniel-quadrat.png" alt="Daniel" class="dark-image" style="width: 250px; height: 250px; object-fit: cover; border-radius: 50%;">
+<div class="dw-about not-prose">
+  <img class="dw-about__portrait" src="/images/about/daniel-portrait-640.webp" alt="Portrait of Daniel Wessendorf" width="200" height="200" />
+  <div>
+    <p class="dw-eyebrow">Data & AI Architect · Co-Founder, SAIN Labs</p>
+    <p class="dw-about__name">Daniel Wessendorf</p>
+    <p class="dw-about__links">
+      <a href="https://linkedin.com/in/daniel-wessendorf" target="_blank" rel="noopener">LinkedIn ↗</a>
+      <a href="https://github.com/dwessendorf" target="_blank" rel="noopener">GitHub ↗</a>
+      <a href="https://www.xing.com/profile/Daniel_Wessendorf/" target="_blank" rel="noopener">Xing ↗</a>
+      <a href="/documents/Lebenslauf_Daniel_Wessendorf.pdf">CV (PDF, German)</a>
+    </p>
   </div>
-  
-  <h1 style="font-size: 2.5rem; margin-top: 1rem;">Daniel Wessendorf</h1>
-  <p style="font-size: 1.25rem; margin-top: 0.5rem;">Senior Solution Engineer at Snowflake</p>
-  <p style="font-size: 1.25rem; margin-top: 0.5rem;">
-    <a href="https://linkedin.com/in/daniel-wessendorf" style="display: inline-block; margin: 0 10px;">
-      <img src="/images/about/hugeicons--linkedin-02.svg" alt="Linkedin" class="invert-in-dark" style="width: 24px; height: 24px;">
-    </a>
-    <a href="https://www.xing.com/profile/Daniel_Wessendorf/" style="display: inline-block; margin: 0 10px;">
-      <img src="/images/about/hugeicons--xing.svg" alt="Xing" class="invert-in-dark" style="width: 24px; height: 24px;">
-    </a>
-    <a href="https://github.com/dwessendorf" style="display: inline-block; margin: 0 10px;">
-      <img src="/images/about/hugeicons--github.svg" alt="Github" class="invert-in-dark" style="width: 24px; height: 24px;">
-    </a>
-  </p>
 </div>
-By day, I'm a Senior Solution Engineer at Snowflake, working with some of the biggest names in the insurance market. Basically, I help companies turn exciting ideas in data and artificial intelligence into reality. 
 
-With 18+ years navigating the tech landscape — from financial services and consulting to adventures in cloud computing and artifical intelligence at Snowflake, Confluent, AWS, Allianz, and Accenture - I've learned a lot and love sharing that knowledge.
+I'm a data and AI architect from Bernried at Lake Starnberg, and since 2026 co-founder of [SAIN Labs]({{< relref "/" >}}#now).
 
-My job involves translating complex tech topics into clear, practical strategies. Think of me as a guide through the fascinating worlds of data and AI, making sure we have fun along the way.
+For about twenty years I've worked where business meets technology: as an IT strategy consultant at Accenture, as chief architect of an internal predictive-analytics startup at Allianz, as a solutions architect for global financial services at AWS, as an executive advisor for data streaming at Confluent, and most recently as a senior solutions engineer for the insurance industry at Snowflake. Along the way I learned to translate complex technology into clear, practical steps, and to have fun doing it.
 
-When I'm not immersed in tech, you'll usually find me hiking trails with my dog, skiing down a snowy slope, or simply enjoying nature with my lovely wife and our two energetic daughters. Time outdoors is my best source of inspiration — and sanity!
+In 2026 I left the big-vendor world to build something of my own. Together with my wife Tanja, I co-founded SAIN Labs, where we're building privacy-first, personal AI. We're still in stealth, so there isn't much more to say yet. If you're curious, [get in touch](mailto:d.wessendorf@gmail.com?subject=SAIN%20Labs%20early%20access).
 
-I also believe that IT is just like cooking: with the right recipes and some experience, both can be incredibly fun and enlighten others. That's why I've started my own Blog and workshops section with tasty data recipes, that you can re-cook and adapt as you like. So, please try this at home, (or work)! 
+I still believe IT is a lot like cooking: with the right recipes and some experience, anyone can create something great. That's why this site has a [blog]({{< relref "/blog" >}}) and [workshops]({{< relref "/workshops" >}}) full of data recipes you can re-cook and adapt. Please try this at home (or at work)!
 
-Glad you stopped by — let's dive into tech together!
+When I'm not at the keyboard, you'll usually find me hiking with our dog, skiing down a snowy slope, or outdoors with Tanja and our two daughters. Time outside is my best source of inspiration, and sanity.
+
+## Steps {#steps}
+
+{{< career >}}

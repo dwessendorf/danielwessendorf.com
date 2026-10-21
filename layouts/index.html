@@ -1,0 +1,11 @@
+{{ define "main" }}
+  {{- /* Disabled sidebar still renders Hextra's mobile menu and enables the footer theme switch. */}}
+  {{ partial "sidebar.html" (dict "context" . "disableSidebar" true) }}
+  <main class="dw-home">
+    {{ partial "home/hero.html" . }}
+    {{ partial "home/sain.html" . }}
+    {{ partial "home/steps.html" . }}
+    {{ partial "home/writing.html" . }}
+    {{ partial "home/contact.html" . }}
+  </main>
+{{ end }}

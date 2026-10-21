@@ -1,0 +1,39 @@
+# danielwessendorf.com on the Future Learning Lab Hetzner server.
+# Installed at /srv/platform/sites/danielwessendorf-com/site.caddy.
+# Validate and reload the existing container; do not restart it.
+
+(dw-static) {
+	# Root-free target approved on 2026-10-21; already mounted read-only in Caddy.
+	root * /srv/static-sites/danielwessendorf.com/public
+	encode zstd gzip
+	file_server
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	@immutable path_regexp fingerprint \.[a-f0-9]{16,}\.(css|js)$
+	header @immutable Cache-Control "public, max-age=31536000, immutable"
+
+	@images path /images/* /documents/* /fonts/*
+	header @images Cache-Control "public, max-age=86400"
+
+	header /.well-known/deployment.json Cache-Control "no-store"
+	header /index.html Cache-Control "no-cache"
+
+	handle_errors 404 {
+		rewrite /404.html
+		file_server
+	}
+}
+
+www.danielwessendorf.com {
+	redir https://danielwessendorf.com{uri} permanent
+}
+
+danielwessendorf.com {
+	import dw-static
+}

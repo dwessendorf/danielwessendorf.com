@@ -1,0 +1,9 @@
+<section class="dw-section dw-wrap" aria-labelledby="dw-steps-title">
+  <div class="dw-section__head">
+    <p class="dw-eyebrow">Steps</p>
+    <h2 id="dw-steps-title" class="dw-h2">Twenty years of data that does something.</h2>
+    <p class="dw-section__intro">From IT strategy and insurance platforms to cloud, data streaming and AI. Every step was about getting data to do real work.</p>
+  </div>
+  {{ partial "steps-timeline.html" (dict "steps" site.Data.steps "compact" true) }}
+  <a class="dw-more" href="{{ (site.GetPage "/about").RelPermalink }}#steps">The full story →</a>
+</section>

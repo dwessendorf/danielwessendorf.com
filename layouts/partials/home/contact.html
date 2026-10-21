@@ -1,0 +1,10 @@
+{{- $contact := site.Params.contact -}}
+<section class="dw-section dw-wrap dw-contact" aria-labelledby="dw-contact-title">
+  <h2 id="dw-contact-title" class="dw-h2">Let's talk data, AI, or both.</h2>
+  <p class="dw-section__intro">Questions about a recipe, an invitation to speak, or curious about SAIN Labs? I'm happy to hear from you.</p>
+  <div class="dw-actions">
+    <a class="dw-btn dw-btn--primary" href="{{ $contact.linkedin }}" target="_blank" rel="noopener">LinkedIn ↗</a>
+    <a class="dw-btn" href="mailto:{{ $contact.email }}">{{ $contact.email }}</a>
+    <a class="dw-btn dw-btn--ghost" href="{{ $contact.github }}" target="_blank" rel="noopener">GitHub ↗</a>
+  </div>
+</section>

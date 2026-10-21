@@ -1,0 +1,15 @@
+{{- /* Renders data/steps.yaml. Params: steps (list), compact (bool: hides notes and places). */ -}}
+<ol class="dw-steps not-prose{{ if .compact }} dw-steps--compact{{ end }}">
+  {{- range .steps }}
+    <li class="dw-step{{ if .current }} dw-step--current{{ end }}">
+      <span class="dw-step__period">{{ .period }}</span>
+      <div class="dw-step__body">
+        <p class="dw-step__org">{{ .org }}</p>
+        <p class="dw-step__role">{{ .role }}{{ if not $.compact }}<span class="dw-step__place"> · {{ .place }}</span>{{ end }}</p>
+        {{- if not $.compact }}
+          <p class="dw-step__note">{{ .note }}</p>
+        {{- end }}
+      </div>
+    </li>
+  {{- end }}
+</ol>
